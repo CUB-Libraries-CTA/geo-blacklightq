@@ -18,10 +18,17 @@ def add(x, y):
     return result
 
 @task()
-def solr_index(items):
+def solr_index(catalog_collection='geoblacklight',solr_index='geoblacklight'):
     """
     Provide a list of JSON items to be index within the
     Geoportal Solr index.
     args: items - List of json objects
     """
-    solr = pysolr.Solr(solr_connection, timeout=10)
+    data_url="/api/catalog/data/catalog/{0}/.json".format(catalog_collection)
+    r = requests.get(data_url)
+    #data = r.json()
+    headers = {'Content-Type':'application/json'}
+    solr_url = "{0}/{1}/update".format(solr_connection,solr_index)
+    sr = requests.post(solr_url,r.text,headers=headers)
+    return sr.text
+    #solr = pysolr.Solr(solr_connection, timeout=10)
