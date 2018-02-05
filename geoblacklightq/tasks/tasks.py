@@ -2,6 +2,7 @@ from celery.task import task
 from dockertask import docker_task
 from subprocess import call,STDOUT
 import requests
+from requests import exceptions
 
 #Default base directory
 #basedir="/data/static/"
@@ -24,11 +25,11 @@ def solr_index(catalog_collection='geoblacklight',solr_index='geoblacklight'):
     Geoportal Solr index.
     args: items - List of json objects
     """
-    data_url="/api/catalog/data/catalog/{0}/.json".format(catalog_collection)
-    r = requests.get(data_url)
+    data = open('geoblacklight-documents.json','r').read()
+    #data_url= requests.get(data_url)
     #data = r.json()
     headers = {'Content-Type':'application/json'}
     solr_url = "{0}/{1}/update".format(solr_connection,solr_index)
-    sr = requests.post(solr_url,r.text,headers=headers)
+    sr = requests.post(solr_url,data,headers=headers)
     return sr.text
     #solr = pysolr.Solr(solr_connection, timeout=10)
