@@ -33,3 +33,11 @@ def solr_index(catalog_collection='geoblacklight',solr_index='geoblacklight'):
     sr = requests.post(url,data,headers=headers)
     return sr.text
     #solr = pysolr.Solr(solr_connection, timeout=10)
+
+@task()
+def solr_index_delete_all(solr_index='geoblacklight'):
+    headers = {'Content-Type':'text/xml'}
+    url = "{0}/{1}/update?commit=true".format(solr_connection,solr_index)
+    data ='<delete><query>*:*</query></delete>'
+    sr = requests.post(url,data,headers=headers)
+    return sr.text
