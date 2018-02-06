@@ -7,7 +7,7 @@ from requests import exceptions
 #Default base directory
 #basedir="/data/static/"
 
-solr_connection="http://geoblacklight_solr:8983/solr/"
+solr_connection="http://geoblacklight_solr:8983/solr"
 #Example task
 @task()
 def add(x, y):
@@ -29,7 +29,7 @@ def solr_index(catalog_collection='geoblacklight',solr_index='geoblacklight'):
     #data_url= requests.get(data_url)
     #data = r.json()
     headers = {'Content-Type':'application/json'}
-    solr_url = "{0}/{1}/update".format(solr_connection,solr_index)
-    sr = requests.post(solr_url,data,headers=headers)
+    url = "{0}/{1}/update".format(solr_connection,solr_index)
+    sr = requests.post(url,data,headers=headers)
     return sr.text
     #solr = pysolr.Solr(solr_connection, timeout=10)
