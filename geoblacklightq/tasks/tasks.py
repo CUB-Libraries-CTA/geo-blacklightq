@@ -30,7 +30,7 @@ def solr_index(catalog_collection='geoblacklight',solr_index='geoblacklight'):
     #data = r.json()
     headers = {'Content-Type':'application/json'}
     url = "{0}/{1}/update".format(solr_connection,solr_index)
-    sr = requests.post(url,data,headers=headers)
+    sr = requests.post(url,data=data,headers=headers)
     return {"status":sr.status_code,"response": sr.json()}
     #solr = pysolr.Solr(solr_connection, timeout=10)
 
