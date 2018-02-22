@@ -19,7 +19,7 @@ def add(x, y):
     return result
 
 @task()
-def solr_index(catalog_collection='geoblacklight',solr_index='geoblacklight'):
+def solrIndexSampleData(catalog_collection='geoblacklight',solr_index='geoblacklight'):
     """
     Provide a list of JSON items to be index within the
     Geoportal Solr index.
@@ -35,9 +35,23 @@ def solr_index(catalog_collection='geoblacklight',solr_index='geoblacklight'):
     #solr = pysolr.Solr(solr_connection, timeout=10)
 
 @task()
-def solr_index_delete_all(solr_index='geoblacklight'):
+def solrDeleteIndex(solr_index='geoblacklight'):
+    """
+    Delete Solr Index:
+    kwargs: solr_index='geoblacklight'
+    """
     headers = {'Content-Type':'text/xml'}
     url = "{0}/{1}/update?commit=true".format(solr_connection,solr_index)
     data ='<delete><query>*:*</query></delete>'
     sr = requests.post(url,data,headers=headers)
-    return sr.text
+    return {"status":sr.status_code,"url":url,"response": sr.text}
+
+@task()
+def solrIndexItems(items,solr_index='geoblacklight'):
+    """
+    Index items to GeoPortal
+    """
+    headers = {'Content-Type':'application/json'}
+    url = "{0}/{1}/update?commit=true".format(solr_connection,solr_index)
+    sr = requests.post(url,data=items,headers=headers)
+    return {"status":sr.status_code,"url":url,"response": sr.json()}
