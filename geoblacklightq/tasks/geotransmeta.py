@@ -52,5 +52,6 @@ def geoBoundsMetadata(filename,format="shapfile"):
 
     else:
         with rasterio.open(filename,'r') as c:
+            bnd= c.bounds
             bnd=(bnd[0],bnd[2],bnd[3],bnd[1])
             return "ENVELOPE{0}".format(bnd)
