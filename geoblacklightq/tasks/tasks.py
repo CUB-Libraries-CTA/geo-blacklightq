@@ -1,5 +1,4 @@
 from celery.task import task
-from dockertask import docker_task
 from subprocess import call,STDOUT
 import requests
 from requests import exceptions
