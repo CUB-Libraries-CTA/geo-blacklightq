@@ -8,7 +8,7 @@ import os, tempfile
 
 #set tmp direcotry. Assign a specific directory with environmental variable
 tmpdir = os.getenv('TMPDIR',tempfile.gettempdir())
-@tasks()
+@task()
 def unzip(filename,destination=None):
     """
     This task unzips content into directory.
