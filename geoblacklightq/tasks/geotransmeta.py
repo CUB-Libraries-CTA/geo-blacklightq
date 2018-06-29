@@ -1,7 +1,7 @@
 from celery.task import task
 from subprocess import call,STDOUT
 from requests import exceptions
-import requests, zipfile, fiona
+import requests, zipfile #, fiona
 import os, tempfile
 
 #rasterio
@@ -46,7 +46,7 @@ def geoBoundsMetadata(filename,format="shapfile"):
         (string): with bounding box.
             path to the unziped directory
     """
-    import rasterio
+    import rasterio, fiona
     if format=="shapfile":
         with fiona.open(filename, 'r') as c:
             bnd= c.bounds

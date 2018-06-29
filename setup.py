@@ -8,6 +8,8 @@ setup(name='geoblacklightq',
           'celery==3.1.22',
           'pymongo==3.2.1',
           'requests==2.9.1',
-          'fiona==1.7.12',
       ],
 )
+
+
+#'fiona==1.7.12',
