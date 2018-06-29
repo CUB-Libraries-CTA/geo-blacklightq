@@ -2,7 +2,9 @@ from celery.task import task
 from subprocess import call,STDOUT
 from requests import exceptions
 import requests, zipfile, fiona
-import os, tempfile, rasterio
+import os, tempfile
+
+#rasterio
 
 #set tmp direcotry. Assign a specific directory with environmental variable
 tmpdir = os.getenv('TMPDIR',tempfile.gettempdir())
@@ -44,6 +46,7 @@ def geoBoundsMetadata(filename,format="shapfile"):
         (string): with bounding box.
             path to the unziped directory
     """
+    import rasterio
     if format=="shapfile":
         with fiona.open(filename, 'r') as c:
             bnd= c.bounds
