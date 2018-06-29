@@ -14,7 +14,7 @@ def unzip(filename,destination=None):
     This task unzips content into directory.
 
     Signature:
-        unzip(filename,destination=None)
+    <blockquote>unzip(filename,destination=None)</blockquote>
     Args:
         filename (string): location of zipfile
     kwargs
@@ -26,7 +26,7 @@ def unzip(filename,destination=None):
     if not destination:
         destination=os.path.splitext(os.path.basename(filename))[0]
     destination = os.path.join(tmpdir,destination)
-    zip_ref = zipfile.ZipFile(zipfile,'r')
+    zip_ref = zipfile.ZipFile(filename,'r')
     zip_ref.extractall(destination)
     return destination
 
