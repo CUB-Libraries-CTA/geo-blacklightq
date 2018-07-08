@@ -51,13 +51,13 @@ def determineTypeBounds(folder):
     shapefiles = findfiles(['*.shp'],where=folder)
     if shapefiles:
         type="shapefile"
-        file = shapefiles[0]
+        file = os.path.join(folder,shapefiles[0])
         bounds=geoBoundsMetadata(file)
     else:
         try:
             imgfiles=findfiles(['*.tif','*.tiff','*.jpg','*.png'],where=folder)
             if imgfiles:
-                file = imgfiles[0]
+                file = os.path.join(folder,imgfiles[0])
                 bounds=geoBoundsMetadata(file,format="image")
                 type="image"
         except:
