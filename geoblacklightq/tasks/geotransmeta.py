@@ -62,7 +62,7 @@ def determineTypeBounds(folder):
         except:
             type="iiif"
             bounds=None
-    return {"file":file,"folder":folder,"bounds":bounds,"type"=type}
+    return {"file":file,"folder":folder,"bounds":bounds,"type":type}
 
 @task()
 def geoBoundsMetadata(filename,format="shapfile"):
