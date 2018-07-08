@@ -2,6 +2,7 @@ from celery.task import task
 from subprocess import call,STDOUT
 from requests import exceptions
 from glob import iglob
+import re, fnmatch
 import requests, zipfile, fiona
 import os, tempfile, rasterio
 
