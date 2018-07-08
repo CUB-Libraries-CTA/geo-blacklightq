@@ -1,11 +1,25 @@
 from celery.task import task
 from subprocess import call,STDOUT
 from requests import exceptions
+from glob import iglob
 import requests, zipfile, fiona
 import os, tempfile, rasterio
 
 #set tmp direcotry. Assign a specific directory with environmental variable
 tmpdir = os.getenv('TMPDIR',tempfile.gettempdir())
+
+def findfiles(patterns, where='.'):
+    '''Returns list of filenames from `where` path matched by 'which'
+       shell pattern. Matching is case-insensitive. return de-duped list just
+       in case multiple patterns hit the same filename
+    '''
+    result=[]
+    for pattern in patterns:
+        # TODO: recursive param with walk() filtering
+        rule = re.compile(fnmatch.translate(pattern), re.IGNORECASE)
+        result = result +  [name for name in os.listdir(where) if rule.match(name)]
+    return list(set(result))
+
 @task()
 def unzip(filename,destination=None):
     """
@@ -27,6 +41,27 @@ def unzip(filename,destination=None):
     zip_ref = zipfile.ZipFile(filename,'r')
     zip_ref.extractall(destination)
     return destination
+
+@task()
+def determineTypeBounds(folder):
+    type = None
+    file = None
+    bounds= None
+    if findfiles(['*.shp'],where=folder):
+        type="shapefile
+        shapefiles=findfiles(['*.shp'],where=folder)
+        file = shapefiles[0]
+        bounds=geoBoundsMetadata(file,format="image")
+    else:
+        try:
+            imgfiles=findfiles(['*.tif','*.tiff','*.jpg','*.png'],where=folder)
+            if imgfiles:
+                file = imgfiles[0]
+                bounds=geoBoundsMetadata(file,format="image")
+        except:
+            type="IIIF"
+            bounds=None
+    return {"file":file,"folder":folder,"bounds":bounds,"type"=type}
 
 @task()
 def geoBoundsMetadata(filename,format="shapfile"):
