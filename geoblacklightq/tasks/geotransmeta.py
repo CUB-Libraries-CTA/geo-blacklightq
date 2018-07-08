@@ -60,6 +60,8 @@ def determineTypeBounds(folder):
                 file = os.path.join(folder,imgfiles[0])
                 bounds=geoBoundsMetadata(file,format="image")
                 type="image"
+            else:
+                raise Exception("This sucks")
         except:
             type="iiif"
             bounds=None
