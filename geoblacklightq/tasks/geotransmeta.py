@@ -48,7 +48,7 @@ def determineTypeBounds(folder):
     file = None
     bounds= None
     if findfiles(['*.shp'],where=folder):
-        type="shapefile
+        type="shapefile"
         shapefiles=findfiles(['*.shp'],where=folder)
         file = shapefiles[0]
         bounds=geoBoundsMetadata(file,format="image")
@@ -58,8 +58,9 @@ def determineTypeBounds(folder):
             if imgfiles:
                 file = imgfiles[0]
                 bounds=geoBoundsMetadata(file,format="image")
+                type="image"
         except:
-            type="IIIF"
+            type="iiif"
             bounds=None
     return {"file":file,"folder":folder,"bounds":bounds,"type"=type}
 
