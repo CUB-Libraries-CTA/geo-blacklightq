@@ -14,8 +14,8 @@ def resetSolrIndex(local_file,request_data):
     return "Succefully Reset Solr Index Workflow(local_file='{0}',request_data='{1}')".format(local_file,request_data)
 
 @task()
-def geoLibraryLoader(localfile,request_data):
+def geoLibraryLoader(local_file,request_data):
     queuename = geoLibraryLoader.request.delivery_info['routing_key']
-    workflow = (unzip.s().set(queue=queuename) |
+    workflow = (unzip.s(local_file).set(queue=queuename) |
                 determineTypeBounds.s().set(queue=queuename))()
     return "Succefully submitted geoLibrary initial workflow(local_file='{0}',request_data='{1}')".format(local_file,request_data)
