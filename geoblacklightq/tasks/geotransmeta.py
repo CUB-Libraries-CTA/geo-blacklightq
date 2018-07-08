@@ -55,14 +55,13 @@ def determineTypeBounds(folder):
         bounds=geoBoundsMetadata(file)
     else:
         try:
-            imgfiles=findfiles(['*.tif','*.tiff','*.jpg','*.png'],where=folder)
+            imgfiles=findfiles(['*.jpg','*.tif','*.tiff','*.png'],where=folder)
             if imgfiles:
                 file = os.path.join(folder,imgfiles[0])
                 bounds=geoBoundsMetadata(file,format="image")
                 type="image"
-            else:
-                raise Exception("This sucks")
         except:
+            file = imgfiles
             type="iiif"
             bounds=None
     return {"file":file,"folder":folder,"bounds":bounds,"type":type}

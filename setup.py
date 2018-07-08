@@ -2,7 +2,7 @@
 #ez_setup.use_setuptools()
 from setuptools import setup, find_packages
 setup(name='geoblacklightq',
-      version='0.0.7.4',
+      version='0.0.7.5',
       packages= find_packages(),
       install_requires=[
           'celery==3.1.22',
