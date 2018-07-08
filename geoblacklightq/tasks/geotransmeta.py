@@ -61,7 +61,6 @@ def determineTypeBounds(folder):
                 bounds=geoBoundsMetadata(file,format="image")
                 type="image"
         except:
-            file = imgfiles
             type="iiif"
             bounds=None
     return {"file":file,"folder":folder,"bounds":bounds,"type":type}
