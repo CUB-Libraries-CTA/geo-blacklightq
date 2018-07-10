@@ -1,6 +1,6 @@
 from celery.task import task
 from subprocess import call,STDOUT
-import requests
+import requests, os
 from requests import exceptions
 from tasks import solrDeleteIndex, solrIndexSampleData
 from geotransmeta import unzip,geoBoundsMetadata, determineTypeBounds
