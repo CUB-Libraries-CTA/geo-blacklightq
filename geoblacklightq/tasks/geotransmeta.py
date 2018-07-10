@@ -89,11 +89,11 @@ def configureGeoData(data,resultDir):
     xmlurls=[]
     fgdclist=[]
     for xml in xmlfiles:
-        shutil.copy(os.path.join(folder,xml),resultDir)
+        shutil.copy(os.path.join(data['folder'],xml),resultDir)
         xmlurls.append(os.path.join(resulturl,resultDir.split('/')[-1],xml))
         import xmltodict
 
-        with open(os.path.join(folder,xml)) as fd:
+        with open(os.path.join(data['folder'],xml)) as fd:
             stringxml = fd.read()
             if 'FGDC' in stringxml.upper():
                 fgdc={}
