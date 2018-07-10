@@ -3,11 +3,12 @@ from subprocess import call,STDOUT
 from requests import exceptions
 from glob import iglob
 import re, fnmatch
-import requests, zipfile, fiona
-import os, tempfile, rasterio
+import requests, zipfile, fiona, shutil
+import os, tempfile, rasterio,xmltodict
 
 #set tmp direcotry. Assign a specific directory with environmental variable
 tmpdir = os.getenv('TMPDIR',tempfile.gettempdir())
+resulturl= "https://geo.colorado.edu/apps/geo_tasks/"
 
 def findfiles(patterns, where='.'):
     '''Returns list of filenames from `where` path matched by 'which'
@@ -21,8 +22,16 @@ def findfiles(patterns, where='.'):
         result = result +  [name for name in os.listdir(where) if rule.match(name)]
     return list(set(result))
 
+def deep_get(_dict, keys, default=None):
+    keys=keys.split('.')
+    def _reducer(d, key):
+        if isinstance(d, dict):
+            return d.get(key, default)
+        return default
+    return reduce(_reducer, keys, _dict)
+
 @task()
-def unzip(filename,destination=None):
+def unzip(filename,destination=None,force=False):
     """
     This task unzips content into directory.
 
@@ -39,12 +48,21 @@ def unzip(filename,destination=None):
     if not destination:
         destination=os.path.splitext(os.path.basename(filename))[0]
     destination = os.path.join(tmpdir,destination)
+    if os.path.exists(destination):
+        if force:
+            shutil.rmtree(destination)
+        else:
+            return {"folder": destination,"zipdata":False}
     zip_ref = zipfile.ZipFile(filename,'r')
     zip_ref.extractall(destination)
-    return destination
+    return {"folder": destination,"zipdata":True}
 
 @task()
-def determineTypeBounds(folder):
+def determineTypeBounds(data):
+    folder= data["folder"]
+    msg = "Initial upload"
+    if not data["zipdata"]:
+        msg="Data uploaded previously - Use force to remove and reload."
     type = None
     file = None
     bounds= None
@@ -63,7 +81,28 @@ def determineTypeBounds(folder):
         except:
             type="iiif"
             bounds=None
-    return {"file":file,"folder":folder,"bounds":bounds,"type":type}
+    return {"file":file,"folder":folder,"bounds":bounds,"type":type,"msg":msg}
+
+@task()
+def configureGeoData(data,resultDir):
+    xmlfiles = findfiles(['*.xml'],where=data["folder"])
+    xmlurls=[]
+    fgdclist=[]
+    for xml in xmlfiles:
+        shutil.copy(os.path.join(folder,xml),resultDir)
+        xmlurls.append(os.path.join(resulturl,resultDir.split('/')[-1],xml))
+        import xmltodict
+
+        with open(os.path.join(folder,xml)) as fd:
+            stringxml = fd.read()
+            if 'FGDC' in stringxml.upper():
+                fgdc={}
+                fgdc['url']=os.path.join(resulturl,resultDir.split('/')[-1],xml)
+                doc = xmltodict.parse(fd.read())
+                fgdc['data']=doc
+                fgdclist.append(fgdc)
+    data['xml']={"urls":xmlurls,"fgdc":fgdclist}
+    return data
 
 @task()
 def geoBoundsMetadata(filename,format="shapfile"):
