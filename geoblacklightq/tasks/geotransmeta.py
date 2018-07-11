@@ -2,7 +2,7 @@ from celery.task import task
 from subprocess import call,STDOUT
 from requests import exceptions
 from glob import iglob
-import re, fnmatch, jinja2
+import re, fnmatch, jinja2, json
 import requests, zipfile, fiona, shutil
 import os, tempfile, rasterio,xmltodict
 
@@ -115,11 +115,11 @@ def crossWalkGeoBlacklight(data, templatename='geoblacklightSchema.tmpl',type='F
     templateEnv = jinja2.Environment( loader=templateLoader )
     template = templateEnv.get_template("templates/{0}".format(templatename))
     crosswalkData = template.render(assignMetaDataComponents(data))
-    data['geoblacklight-schema']=crosswalkData
+    data['geoblacklight-schema']=json.loads(crosswalkData)
     return data
 
 def assignMetaDataComponents(data,type='fgdc'):
-    dataJsonObj=deep_get(data,"fgdc",[])
+    dataJsonObj=deep_get(data,"xml.fgdc",[])
     if len (dataJsonObj)>0:
         dataJsonObj=dataJsonObj[0]
     else:
