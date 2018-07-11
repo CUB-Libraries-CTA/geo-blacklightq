@@ -121,7 +121,7 @@ def crossWalkGeoBlacklight(data, templatename='geoblacklightSchema.tmpl',type='F
 def assignMetaDataComponents(data,type='fgdc'):
     dataJsonObj=deep_get(data,"xml.fgdc",[])
     if len (dataJsonObj)>0:
-        dataJsonObj=dataJsonObj[0]
+        dataJsonObj=deep_get(dataJsonObj[0],"data",{})
     else:
         dataJsonObj={}
     gblight={}
