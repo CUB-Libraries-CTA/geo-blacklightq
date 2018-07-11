@@ -2,7 +2,7 @@ from celery.task import task
 from subprocess import call,STDOUT
 from requests import exceptions
 from glob import iglob
-import re, fnmatch
+import re, fnmatch, jinja2
 import requests, zipfile, fiona, shutil
 import os, tempfile, rasterio,xmltodict
 
