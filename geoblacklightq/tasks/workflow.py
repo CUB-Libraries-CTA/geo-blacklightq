@@ -4,7 +4,7 @@ import requests, os
 from requests import exceptions
 from tasks import solrDeleteIndex, solrIndexSampleData
 from geotransmeta import unzip,geoBoundsMetadata, determineTypeBounds
-from geotransmeta import configureGeoData
+from geotransmeta import configureGeoData, crossWalkGeoBlacklight
 import json
 
 wwwdir = "/data/static"
@@ -34,8 +34,11 @@ def geoLibraryLoader(local_file,request_data,force=False):
     task_id = str(geoLibraryLoader.request.id)
     resultDir = os.path.join(wwwdir, 'geo_tasks', task_id)
     os.makedirs(resultDir)
+    if 'force' in request_data:
+        force = request_data['force']
     queuename = geoLibraryLoader.request.delivery_info['routing_key']
     workflow = (unzip.s(local_file).set(queue=queuename) |
                 determineTypeBounds.s().set(queue=queuename) |
-                configureGeoData.s(resultDir).set(queue=queuename))()
+                configureGeoData.s(resultDir).set(queue=queuename) |
+                crossWalkGeoBlacklight.s().set(queue=queuename))()
     return "Succefully submitted geoLibrary initial workflow"

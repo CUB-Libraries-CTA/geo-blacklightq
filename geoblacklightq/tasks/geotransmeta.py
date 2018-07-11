@@ -101,8 +101,63 @@ def configureGeoData(data,resultDir):
                 doc = xmltodict.parse(stringxml)
                 fgdc['data']=doc
                 fgdclist.append(fgdc)
+    data['xmlurls']=xmlurls
     data['xml']={"urls":xmlurls,"fgdc":fgdclist}
     return data
+
+@task()
+def crossWalkGeoBlacklight(data, templatename='geoblacklightSchema.tmpl',type='FGDC'):
+    """
+    Crosswalk
+    """
+    # load template
+    templateLoader = jinja2.FileSystemLoader( searchpath=os.path.dirname(os.path.realpath(__file__)) )
+    templateEnv = jinja2.Environment( loader=templateLoader )
+    template = templateEnv.get_template("templates/{0}".format(templatename))
+    crosswalkData = template.render(assignMetaDataComponents(data))
+    data['geoblacklight-schema']=crosswalkData
+    return data
+
+def assignMetaDataComponents(data,type='fgdc'):
+    dataJsonObj=deep_get(data,"fgdc",[])
+    if len (dataJsonObj)>0:
+        dataJsonObj=dataJsonObj[0]
+    else:
+        dataJsonObj={}
+    gblight={}
+    gblight['uuid']= "DO NOT SET"
+    gblight['dc_identifier_s'] = "DO NOT SET"
+    gblight['dc_title_s'] = deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.title","")
+    descript
+    gblight['dc_description_s'] = deep_get(dataJsonObj,"metadata.idinfo.descript.abstract","")
+    gblight['dc_rights_s'] = "Public"
+    gblight['dct_provenance_s'] = "University of Colorado Boulder"
+    gblight['dct_references_s'] = "DO NOT SET"
+    gblight['layer_id_s'] = "DO NOT SET"
+    gblight['layer_slug_s'] = "DO NOT SET"
+    gblight['layer_geom_type_s'] = ""
+    gblight['dc_format_s'] =deep_get(dataJsonObj,"metadata.distInfo.distFormat.formatName.#text","")
+    gblight['dc_language_s'] = "English"
+    gblight['dc_type_s'] = "Dataset"
+    gblight['dc_publisher_s'] = deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.origin","")
+    gblight['dc_creator_sm'] = [deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.origin","")]
+    subjects = deep_get(dataJsonObj,"metadata.idinfo.keywords.theme",[])
+    subs=[]
+    for itm in subjects:
+        temp=deep_get(itm,"themekey",[])
+        if not isinstance(temp, list):
+            temp=[temp]
+        subs = subs + temp
+    gblight['dc_subject_sm'] = subs
+    pubdate=deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.pubdate","")
+    gblight['dct_issued_s'] = pubdate
+    gblight['dct_temporal_sm'] = [pubdate]
+    place =deep_get(dataJsonObj,"metadata.idinfo.keywords.place.placekey",[])
+    if not isinstance(place, list):
+        place=[place]
+    gblight['dct_spatial_sm'] = place
+    gblight['solr_geom'] = "DO NOT SET"
+    return gblight
 
 @task()
 def geoBoundsMetadata(filename,format="shapfile"):
