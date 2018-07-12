@@ -138,8 +138,9 @@ def assignMetaDataComponents(data,type='fgdc'):
     gblight['dc_format_s'] =deep_get(dataJsonObj,"metadata.distInfo.distFormat.formatName.#text","")
     gblight['dc_language_s'] = "English"
     gblight['dc_type_s'] = "Dataset"
-    gblight['dc_publisher_s'] = json.dumps(deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.origin",""))
-    gblight['dc_creator_sm'] = [json.dumps(deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.origin",""))]
+    creator= deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.origin","")
+    gblight['dc_publisher_s'] = creator
+    gblight['dc_creator_sm'] = '["{0}"]'.format(creator)
     subjects = deep_get(dataJsonObj,"metadata.idinfo.keywords.theme",[])
     subs=[]
     for itm in subjects:
@@ -149,8 +150,8 @@ def assignMetaDataComponents(data,type='fgdc'):
         subs = subs + temp
     gblight['dc_subject_sm'] = json.dumps(subs)
     pubdate=deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.pubdate","")
-    gblight['dct_issued_s'] = json.dumps(pubdate)
-    gblight['dct_temporal_sm'] = [json.dumps(pubdate)]
+    gblight['dct_issued_s'] = pubdate
+    gblight['dct_temporal_sm'] = '["{0}"]'.format(pubdate)
     place =deep_get(dataJsonObj,"metadata.idinfo.keywords.place.placekey",[])
     if not isinstance(place, list):
         place=[place]
