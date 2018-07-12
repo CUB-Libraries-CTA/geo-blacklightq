@@ -138,8 +138,8 @@ def assignMetaDataComponents(data,type='fgdc'):
     gblight['dc_format_s'] =deep_get(dataJsonObj,"metadata.distInfo.distFormat.formatName.#text","")
     gblight['dc_language_s'] = "English"
     gblight['dc_type_s'] = "Dataset"
-    gblight['dc_publisher_s'] = deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.origin","")
-    gblight['dc_creator_sm'] = [deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.origin","")]
+    gblight['dc_publisher_s'] = json.dumps(deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.origin",""))
+    gblight['dc_creator_sm'] = [json.dumps(deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.origin",""))]
     subjects = deep_get(dataJsonObj,"metadata.idinfo.keywords.theme",[])
     subs=[]
     for itm in subjects:
