@@ -147,14 +147,14 @@ def assignMetaDataComponents(data,type='fgdc'):
         if not isinstance(temp, list):
             temp=[temp]
         subs = subs + temp
-    gblight['dc_subject_sm'] = subs
+    gblight['dc_subject_sm'] = json.dumps(subs)
     pubdate=deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.pubdate","")
-    gblight['dct_issued_s'] = pubdate
-    gblight['dct_temporal_sm'] = [pubdate]
+    gblight['dct_issued_s'] = json.dumps(pubdate)
+    gblight['dct_temporal_sm'] = [json.dumps(pubdate)]
     place =deep_get(dataJsonObj,"metadata.idinfo.keywords.place.placekey",[])
     if not isinstance(place, list):
         place=[place]
-    gblight['dct_spatial_sm'] = place
+    gblight['dct_spatial_sm'] = json.dumps(place)
     gblight['solr_geom'] = "DO NOT SET"
     return gblight
 
