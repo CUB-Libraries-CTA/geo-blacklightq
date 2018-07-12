@@ -115,7 +115,7 @@ def crossWalkGeoBlacklight(data, templatename='geoblacklightSchema.tmpl',type='F
     templateEnv = jinja2.Environment( loader=templateLoader )
     template = templateEnv.get_template("templates/{0}".format(templatename))
     crosswalkData = template.render(assignMetaDataComponents(data))
-    data['geoblacklight-schema']=json.loads(crosswalkData)
+    data['geoblacklight-schema']=crosswalkData
     return data
 
 def assignMetaDataComponents(data,type='fgdc'):
