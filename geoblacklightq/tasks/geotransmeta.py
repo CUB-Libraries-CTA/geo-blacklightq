@@ -117,7 +117,7 @@ def crossWalkGeoBlacklight(data, templatename='geoblacklightSchema.tmpl',type='F
     crosswalkData = template.render(assignMetaDataComponents(data))
     gblight = json.loads(crosswalkData)
     gblight['solr_geom']=data['bounds']
-    data['geoblacklight-schema']=gblight
+    data['geoblacklightschema']=gblight
     return data
 
 def assignMetaDataComponents(data,type='fgdc'):
