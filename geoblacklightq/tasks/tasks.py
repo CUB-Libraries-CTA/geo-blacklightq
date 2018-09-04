@@ -52,5 +52,8 @@ def solrIndexItems(items,solr_index='geoblacklight'):
     """
     headers = {'Content-Type':'application/json'}
     url = "{0}/{1}/update?commit=true".format(solr_connection,solr_index)
-    sr = requests.post(url,data=items,headers=headers)
-    return {"status":sr.status_code,"url":url,"response": sr.json()}
+    resuts =[]
+    for itm in items:
+        sr = requests.post(url,data=itm,headers=headers)
+        results.append({"status":sr.status_code,"url":url,"response": sr.json()})
+    return results
