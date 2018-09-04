@@ -1,6 +1,6 @@
 from celery.task import task
 from subprocess import call,STDOUT
-import requests
+import requests,json
 from requests import exceptions
 
 #Default base directory
@@ -54,6 +54,6 @@ def solrIndexItems(items,solr_index='geoblacklight'):
     url = "{0}/{1}/update?commit=true".format(solr_connection,solr_index)
     results =[]
     for itm in items:
-        sr = requests.post(url,data=itm,headers=headers)
+        sr = requests.post(url,json=itm,headers=headers)
         results.append({"status":sr.status_code,"url":url,"response": sr.json()})
     return results
