@@ -2,7 +2,7 @@ from celery.task import task
 from subprocess import call,STDOUT
 import requests, os
 from requests import exceptions
-from tasks import solrDeleteIndex, solrIndexSampleData
+from tasks import solrDeleteIndex, solrIndexSampleData, solrIndexItems
 from geotransmeta import unzip,geoBoundsMetadata, determineTypeBounds
 from geotransmeta import configureGeoData, crossWalkGeoBlacklight
 import json
@@ -10,11 +10,20 @@ import json
 wwwdir = "/data/static"
 
 @task()
-def resetSolrIndex(local_file,request_data):
+def resetSolrIndex(items):
+    """
+    Delete current solr index and indexs items sent in Args
+    Args:
+        items (list of objects)
+    returns:
+        acknowledgement of workflow submitted.
+        Children chain: solrDeleteIndex --> solrIndexItems
+    """
+
     queuename = resetSolrIndex.request.delivery_info['routing_key']
     workflow = (solrDeleteIndex.si().set(queue=queuename) |
-                solrIndexSampleData.si().set(queue=queuename))()
-    return "Succefully Reset Solr Index Workflow(local_file='{0}',request_data='{1}')".format(local_file,request_data)
+                solrIndexItems.si(items).set(queue=queuename))()
+    return "Succefully Workflow Submitted: children workflow chain: solrDeleteIndex --> solrIndexItems"
 
 @task()
 def geoLibraryLoader(local_file,request_data,force=False):
