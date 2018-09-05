@@ -57,3 +57,10 @@ def solrIndexItems(items,solr_index='geoblacklight'):
     sr = requests.post(url,json=items,headers=headers)
     #results.append({"status":sr.status_code,"url":url,"response": sr.json()})
     return {"status":sr.status_code,"url":url,"response": sr.json()}
+
+@task()
+def solrSearch(query,solr_index='geoblacklight'):
+    headers = {'Content-Type':'application/json'}
+    url = "{0}/{1}/select?q={2}".format(solr_connection,solr_index,query)
+    sr = requests.get(url,headers=headers)
+    return sr.json()
