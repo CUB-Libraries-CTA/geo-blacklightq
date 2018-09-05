@@ -55,7 +55,11 @@ def unzip(filename,destination=None,force=False):
             return {"folder": destination,"zipdata":False}
     zip_ref = zipfile.ZipFile(filename,'r')
     zip_ref.extractall(destination)
-    return {"folder": destination,"zipdata":True}
+    zipname = filename.split('/')[-1]
+    shutil.copy(filename,"/data/static/geolibrary/datasets/{0}".format(zipname))
+    zip_url = "https://geo.colorado.edu/apps/geolibrary/datasets/{0}".format(zipname)
+    os.remove(filename)
+    return {"folder": destination,"zipdata":True,"zipurl":zip_url}
 
 @task()
 def determineTypeBounds(data):
