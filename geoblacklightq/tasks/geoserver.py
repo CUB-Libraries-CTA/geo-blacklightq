@@ -1,9 +1,8 @@
-from geoserver.catalog import Catalog
 from celery.task import task
 from subprocess import call,STDOUT
-import requests, os,json, xmltodict
-#from geoserver.catalog import Catalog
-#from geoserver.util import shapefile_and_friends
+from geoserver.catalog import Catalog
+from geoserver.util import shapefile_and_friends
+import requests, os, json, xmltodict
 
 workspace = os.getenv('WRKSPACE',"geocolorado")
 geoserver_connection="https://geo.colorado.edu/geoserver"
