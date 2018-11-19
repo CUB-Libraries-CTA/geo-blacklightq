@@ -1,3 +1,4 @@
+from geoserver.catalog import Catalog
 from celery.task import task
 from subprocess import call,STDOUT
 import requests, os,json, xmltodict
