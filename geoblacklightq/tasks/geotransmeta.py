@@ -166,7 +166,7 @@ def assignMetaDataComponents(data,type='fgdc'):
     return gblight
 
 @task()
-def geoBoundsMetadata(filename,format="shapfile"):
+def geoBoundsMetadata(filename,format="shapefile"):
     """
     This task finds bounding box of georeferenced shapefile or raster.
 
@@ -181,7 +181,7 @@ def geoBoundsMetadata(filename,format="shapfile"):
         (string): with bounding box.
             path to the unziped directory
     """
-    if format=="shapfile":
+    if format=="shapefile":
         with fiona.open(filename, 'r') as c:
             bnd= c.bounds
             bnd=(bnd[0],bnd[2],bnd[3],bnd[1])
