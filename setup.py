@@ -12,7 +12,8 @@ setup(name='geoblacklightq',
           'xmltodict==0.11.0',
           'jinja2',
           'gsconfig',
-          'fiona'
+          'fiona',
+          'rasterio'
       ],
       include_package_data=True,
 )
