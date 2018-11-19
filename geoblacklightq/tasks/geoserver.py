@@ -53,7 +53,7 @@ def createDataStore(name,filename, format="shapefile"):
         resource.projection='EPSG:4326'
         resource.projection_policy='REPROJECT_TO_DECLARED'
         cat.save(resource)
-    else if format == "image":
+    elif format == "image":
         newcs= cat.create_coveragestore2(name,ws)
         newcs.type="GeoTIFF"
         url="something"
