@@ -2,7 +2,7 @@
 #ez_setup.use_setuptools()
 from setuptools import setup, find_packages
 setup(name='geoblacklightq',
-      version='0.0.7.733',
+      version='0.0.7.734',
       packages= find_packages(),
       package_data={'geoblacklightq':['tasks/templates/*.tmpl','geoblacklightq/tasks/templates/*.tmpl']},
       install_requires=[
@@ -12,6 +12,7 @@ setup(name='geoblacklightq',
           'xmltodict==0.11.0',
           'jinja2',
           'gsconfig',
+          'fiona'
       ],
       include_package_data=True,
 )
