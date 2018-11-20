@@ -147,8 +147,8 @@ def assignMetaDataComponents(data,type='fgdc'):
     gblight['dc_identifier_s'] = "DO NOT SET"
     gblight['dc_title_s'] = deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.title",
                 deep_get(dataJsonObj,"metadata.dataIdInfo.idCitation.resTitle",""))
-    gblight['dc_description_s'] = deep_get(dataJsonObj,"metadata.idinfo.descript.abstract","")
-    #            deep_get(dataJsonObj,"metadata.dataIdInfo.idAbs",""))
+    gblight['dc_description_s'] = deep_get(dataJsonObj,"metadata.idinfo.descript.abstract",
+                re.sub('<[^<]+>', "", deep_get(dataJsonObj,"metadata.dataIdInfo.idAbs","")))
     gblight['dc_rights_s'] = "Public"
     gblight['dct_provenance_s'] = "University of Colorado Boulder"
     gblight['dct_references_s'] = "DO NOT SET"
