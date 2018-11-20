@@ -124,7 +124,7 @@ def crossWalkGeoBlacklight(data, templatename='geoblacklightSchema.tmpl',type='F
     data['geoblacklightschema']=gblight
     return data
 
-def findSubject(keyword):
+def findSubject(subjects,keyword):
     for itm in subjects:
         temp=deep_get(itm,keyword,[])
         if not isinstance(temp, list):
@@ -160,9 +160,9 @@ def assignMetaDataComponents(data,type='fgdc'):
     gblight['dc_creator_sm'] = '["{0}"]'.format(creator)
     subjects = deep_get(dataJsonObj,"metadata.idinfo.keywords.theme",
                 deep_get(dataJsonObj,"metadata..dataIdInfo.searchKeys",[]))
-    subs=findSubject("themekey")
+    subs=findSubject(subjects,"themekey")
     if not subs:
-        subs=findSubject("keyword")
+        subs=findSubject(subjects,"keyword")
     gblight['dc_subject_sm'] = json.dumps(subs)
     pubdate=deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.pubdate",
                     deep_get(dataJsonObj,"metadata.mdDateSt",""))
