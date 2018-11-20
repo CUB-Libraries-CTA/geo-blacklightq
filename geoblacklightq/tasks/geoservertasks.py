@@ -48,9 +48,9 @@ def createDataStore(name,filename, format="shapefile"):
     if format == "shapefile":
         shapefile=shapefile_and_friends(filename)
         ft = cat.create_featurestore(name, shapefile, workspace)
-        resource=cat.get_resource(name)
-        resource.projection='EPSG:4326'
+        resource=cat.get_resource(name,workspace=ws)
         resource.projection_policy='REPROJECT_TO_DECLARED'
+        resource.projection='EPSG:4326'
         cat.save(resource)
     elif format == "image":
         newcs= cat.create_coveragestore2(name,ws)
