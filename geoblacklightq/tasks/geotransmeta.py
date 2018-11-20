@@ -168,8 +168,8 @@ def assignMetaDataComponents(data,type='fgdc'):
     #if not subs:
     #    subs=findSubject(subjects,"keyword")
     gblight['dc_subject_sm'] = json.dumps(subs)
-    pubdate=deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.pubdate",
-                    deep_get(dataJsonObj,"metadata.mdDateSt",""))
+    pubdate=deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.pubdate","")
+    #deep_get(dataJsonObj,"metadata.mdDateSt",""))
     gblight['dct_issued_s'] = pubdate
     gblight['dct_temporal_sm'] = '["{0}"]'.format(pubdate)
     place =deep_get(dataJsonObj,"metadata.idinfo.keywords.place.placekey",[])
@@ -177,6 +177,7 @@ def assignMetaDataComponents(data,type='fgdc'):
         place=[place]
     gblight['dct_spatial_sm'] = json.dumps(place)
     gblight['solr_geom'] = "DO NOT SET"
+    print(gblight)
     return gblight
 
 @task()
