@@ -125,6 +125,7 @@ def crossWalkGeoBlacklight(data, templatename='geoblacklightSchema.tmpl',type='F
     return data
 
 def findSubject(subjects,keyword):
+    subs=[]
     for itm in subjects:
         temp=deep_get(itm,keyword,[])
         if not isinstance(temp, list):
