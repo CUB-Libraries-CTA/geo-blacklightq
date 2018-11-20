@@ -56,6 +56,7 @@ def createDataStore(name,filename, format="shapefile"):
         newcs= cat.create_coveragestore2(name,ws)
         newcs.type="GeoTIFF"
         url="something"
+    return True
 
 #@task()
 #def getBoundingBox(name)
