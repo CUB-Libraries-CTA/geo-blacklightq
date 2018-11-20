@@ -147,8 +147,8 @@ def assignMetaDataComponents(data,type='fgdc'):
     gblight['dc_identifier_s'] = "DO NOT SET"
     gblight['dc_title_s'] = deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.title",
                 deep_get(dataJsonObj,"metadata.dataIdInfo.idCitation.resTitle",""))
-    gblight['dc_description_s'] = deep_get(dataJsonObj,"metadata.idinfo.descript.abstract",
-                deep_get(dataJsonObj,"metadata.dataIdInfo.idAbs",""))
+    gblight['dc_description_s'] = deep_get(dataJsonObj,"metadata.idinfo.descript.abstract","")
+    #            deep_get(dataJsonObj,"metadata.dataIdInfo.idAbs",""))
     gblight['dc_rights_s'] = "Public"
     gblight['dct_provenance_s'] = "University of Colorado Boulder"
     gblight['dct_references_s'] = "DO NOT SET"
@@ -168,8 +168,8 @@ def assignMetaDataComponents(data,type='fgdc'):
     #if not subs:
     #    subs=findSubject(subjects,"keyword")
     gblight['dc_subject_sm'] = json.dumps(subs)
-    pubdate=deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.pubdate","")
-    #deep_get(dataJsonObj,"metadata.mdDateSt",""))
+    pubdate=deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.pubdate",
+            deep_get(dataJsonObj,"metadata.mdDateSt",""))
     gblight['dct_issued_s'] = pubdate
     gblight['dct_temporal_sm'] = '["{0}"]'.format(pubdate)
     place =deep_get(dataJsonObj,"metadata.idinfo.keywords.place.placekey",[])
