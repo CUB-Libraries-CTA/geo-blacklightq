@@ -48,7 +48,6 @@ def createDataStore(name,filename, format="shapefile"):
     if format == "shapefile":
         shapefile=shapefile_and_friends(filename)
         ft = cat.create_featurestore(name, shapefile, workspace)
-        cat.save(ft)
         resource=cat.get_resource(name,workspace=ws)
         resource.projection='EPSG:4326'
         cat.save(resource)
