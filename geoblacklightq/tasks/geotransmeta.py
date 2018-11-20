@@ -165,8 +165,8 @@ def assignMetaDataComponents(data,type='fgdc'):
     subjects = deep_get(dataJsonObj,"metadata.idinfo.keywords.theme",
                 deep_get(dataJsonObj,"metadata..dataIdInfo.searchKeys",[]))
     subs=findSubject(subjects,"themekey")
-    if not subs:
-        subs=findSubject(subjects,"keyword")
+    #if not subs:
+    #    subs=findSubject(subjects,"keyword")
     gblight['dc_subject_sm'] = json.dumps(subs)
     pubdate=deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.pubdate",
                     deep_get(dataJsonObj,"metadata.mdDateSt",""))
