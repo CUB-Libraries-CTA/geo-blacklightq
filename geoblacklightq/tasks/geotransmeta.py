@@ -126,11 +126,14 @@ def crossWalkGeoBlacklight(data, templatename='geoblacklightSchema.tmpl',type='F
 
 def findSubject(subjects,keyword):
     subs=[]
-    for itm in subjects:
-        temp=deep_get(itm,keyword,[])
-        if not isinstance(temp, list):
-            temp=[temp]
-        subs = subs + temp
+    try:
+        for itm in subjects:
+            temp=deep_get(itm,keyword,[])
+            if not isinstance(temp, list):
+                temp=[temp]
+            subs = subs + temp
+    except Exception as inst:
+        subs.append(str(inst))
     return subs
 
 def assignMetaDataComponents(data,type='fgdc'):
