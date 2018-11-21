@@ -82,10 +82,12 @@ def determineTypeBounds(data):
                 file = os.path.join(folder,imgfiles[0])
                 bounds=geoBoundsMetadata(file,format="image")
                 type="image"
+            else:
+                raise Exception("No suitable georeferenced or scanned image file found")
         except:
             type="iiif"
             bounds=None
-    return {"file":file,"folder":folder,"bounds":bounds,"type":type,"msg":msg}
+    return {"file":file,"folder":folder,"bounds":bounds,"type":type,"msg":msg,"zipurl":data["zipurl"]}
 
 @task()
 def configureGeoData(data,resultDir):
