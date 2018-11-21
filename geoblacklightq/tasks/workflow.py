@@ -5,6 +5,7 @@ from requests import exceptions
 from tasks import solrDeleteIndex, solrIndexSampleData, solrIndexItems
 from geotransmeta import unzip,geoBoundsMetadata, determineTypeBounds
 from geotransmeta import configureGeoData, crossWalkGeoBlacklight
+from geoservertasks import dataLoadGeoserver
 import json
 
 wwwdir = "/data/static"
@@ -48,6 +49,7 @@ def geoLibraryLoader(local_file,request_data,force=False):
     queuename = geoLibraryLoader.request.delivery_info['routing_key']
     workflow = (unzip.s(local_file).set(queue=queuename) |
                 determineTypeBounds.s().set(queue=queuename) |
+                dataLoadGeoserver.s().set(queue=queuename) |
                 configureGeoData.s(resultDir).set(queue=queuename) |
                 crossWalkGeoBlacklight.s().set(queue=queuename))()
     return "Succefully submitted geoLibrary initial workflow"
