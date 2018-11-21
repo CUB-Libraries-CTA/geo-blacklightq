@@ -52,7 +52,11 @@ def unzip(filename,destination=None,force=False):
         if force:
             shutil.rmtree(destination)
         else:
-            return {"folder": destination,"zipdata":False}
+            zipname = filename.split('/')[-1]
+            zip_url = "https://geo.colorado.edu/apps/geolibrary/datasets/{0}".format(zipname)
+            if not os.path.isfile("/data/static/geolibrary/datasets/{0}".format(zipname)):
+                shutil.copy(filename,"/data/static/geolibrary/datasets/{0}".format(zipname))
+            return {"folder": destination,"zipdata":False,"zipurl":zip_url}
     zip_ref = zipfile.ZipFile(filename,'r')
     zip_ref.extractall(destination)
     zipname = filename.split('/')[-1]
