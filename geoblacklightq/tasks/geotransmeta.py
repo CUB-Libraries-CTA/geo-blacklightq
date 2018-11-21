@@ -56,6 +56,7 @@ def unzip(filename,destination=None,force=False):
             zip_url = "https://geo.colorado.edu/apps/geolibrary/datasets/{0}".format(zipname)
             if not os.path.isfile("/data/static/geolibrary/datasets/{0}".format(zipname)):
                 shutil.copy(filename,"/data/static/geolibrary/datasets/{0}".format(zipname))
+            os.remove(filename)
             return {"folder": destination,"zipdata":False,"zipurl":zip_url}
     zip_ref = zipfile.ZipFile(filename,'r')
     zip_ref.extractall(destination)
