@@ -126,7 +126,7 @@ def crossWalkGeoBlacklight(data, templatename='geoblacklightSchema.tmpl',type='F
     templateEnv = jinja2.Environment( loader=templateLoader )
     template = templateEnv.get_template("templates/{0}".format(templatename))
     crosswalkData = template.render(assignMetaDataComponents(data))
-    gblight = json.loads(crosswalkData, object_pairs_hook=OrderedDict, strict=False)
+    gblight = json.loads(crosswalkData, strict=False)
     gblight['solr_geom']=data['bounds']
     data['geoblacklightschema']=gblight
     return data
