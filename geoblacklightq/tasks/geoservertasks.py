@@ -65,7 +65,7 @@ def createDataStore(name,filename, format="shapefile"):
         cat.save(resource)
         resource.refresh()
         bbox=resource.latlon_bbox[:4]
-        solr_geom = 'ENVELOPE({0},{1},{2},{3})'.format(bbox[0],bbox[1],bbox[3],bbox2)
+        solr_geom = 'ENVELOPE({0},{1},{2},{3})'.format(bbox[0],bbox[1],bbox[3],bbox[2])
         return solr_geom
     elif format == "image":
         newcs= cat.create_coveragestore2(name,ws)
