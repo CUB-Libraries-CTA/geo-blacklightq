@@ -109,7 +109,7 @@ def configureGeoData(data,resultDir):
             if 'FGDC' in stringxml.upper():
                 fgdc={}
                 fgdc['url']=os.path.join(resulturl,resultDir.split('/')[-1],xml)
-                doc = xmltodict.parse(stringxml,attr_prefix='',dict_constructor=dict)
+                doc = xmltodict.parse(stringxml,cdata_key='text',attr_prefix='',dict_constructor=dict)
                 fgdc['data']=doc
                 fgdclist.append(fgdc)
     data['xmlurls']=xmlurls
