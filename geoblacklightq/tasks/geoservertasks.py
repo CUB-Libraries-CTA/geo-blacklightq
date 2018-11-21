@@ -48,16 +48,23 @@ def dataLoadGeoserver(data):
     if data['type'] =='shapefile':
         filename="{0}/{1}".format(data['folder'],geoserverStoreName)
         bbox=createDataStore(geoserverStoreName,filename,format=data['type'])
-        data["bounds"]=bbox
+        data["msg"] = "{0} {1}".format(data["msg"],bbox["msg"])
+        data["bounds"]=bbox["solr_geom"]
     return data
 
 @task()
 def createDataStore(name,filename, format="shapefile"):
     cat = Catalog("{0}/rest/".format(geoserver_connection),geoserver_username,geoserver_password)
     ws = cat.get_workspace(workspace)
+    msg=""
     if format == "shapefile":
         shapefile=shapefile_and_friends(filename)
-        ft = cat.create_featurestore(name, shapefile, workspace)
+        try:
+            ft = cat.create_featurestore(name, shapefile, workspace)
+        except ConflictingDataError as inst:
+            msg = str(inst)
+        except:
+            raise
         resource=cat.get_resource(name,workspace=ws)
         resource.projection='EPSG:4326'
         cat.save(resource)
@@ -66,7 +73,7 @@ def createDataStore(name,filename, format="shapefile"):
         resource.refresh()
         bbox=resource.latlon_bbox[:4]
         solr_geom = 'ENVELOPE({0},{1},{2},{3})'.format(bbox[0],bbox[1],bbox[3],bbox[2])
-        return solr_geom
+        return {"solr_geom":solr_geom,"msg":msg}
     elif format == "image":
         newcs= cat.create_coveragestore2(name,ws)
         newcs.type="GeoTIFF"
