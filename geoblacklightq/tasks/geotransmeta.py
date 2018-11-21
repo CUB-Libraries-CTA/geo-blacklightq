@@ -109,7 +109,7 @@ def configureGeoData(data,resultDir):
             if 'FGDC' in stringxml.upper():
                 fgdc={}
                 fgdc['url']=os.path.join(resulturl,resultDir.split('/')[-1],xml)
-                doc = xmltodict.parse(stringxml)
+                doc = xmltodict.parse(stringxml,attr_prefix='',dict_constructor=dict)
                 fgdc['data']=doc
                 fgdclist.append(fgdc)
     data['xmlurls']=xmlurls
@@ -126,7 +126,7 @@ def crossWalkGeoBlacklight(data, templatename='geoblacklightSchema.tmpl',type='F
     templateEnv = jinja2.Environment( loader=templateLoader )
     template = templateEnv.get_template("templates/{0}".format(templatename))
     crosswalkData = template.render(assignMetaDataComponents(data))
-    gblight = json.loads(crosswalkData,strict=False)
+    gblight = json.loads(crosswalkData, object_pairs_hook=OrderedDict, strict=False)
     gblight['solr_geom']=data['bounds']
     data['geoblacklightschema']=gblight
     return data
