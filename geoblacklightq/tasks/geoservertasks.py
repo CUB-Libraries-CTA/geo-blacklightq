@@ -1,6 +1,6 @@
 from celery.task import task
 from subprocess import call,STDOUT
-from geoserver.catalog import Catalog
+from geoserver.catalog import Catalog, ConflictingDataError
 from geoserver.util import shapefile_and_friends
 import requests, os, json, xmltodict
 
