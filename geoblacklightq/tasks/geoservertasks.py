@@ -53,7 +53,10 @@ def dataLoadGeoserver(data):
     elif data['type']=='image':
         fileUrl="file:{0}".format(data['file'][1:])
         bbox=createDataStore(geoserverStoreName,fileUrl,format=data['type'])
-
+        data["msg"] = "{0} {1}".format(data["msg"],bbox["msg"])
+        data["bounds"]=bbox["solr_geom"]
+    else:
+        data["msg"] = "{0} {1}".format(data["msg"],"Data element not georeferenced. IIIF server not implemented.")
     return data
 
 @task()
@@ -88,7 +91,7 @@ def createDataStore(name,filename, format="shapefile"):
         newcs.type="GeoTIFF"
         newcs.url=filename
         cat.save(newcs)
-        #add coverage  
+        #add coverage
         url="{0}/rest/workspaces/{1}/coveragestores/{2}/coverages.json"
         url = url.format(geoserver_connection,ws.name,name)
         coverageName= os.path.splitext(os.path.basename(filename))[0]
