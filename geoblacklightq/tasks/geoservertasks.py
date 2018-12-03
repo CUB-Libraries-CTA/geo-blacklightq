@@ -43,13 +43,17 @@ def geoserverGetWorkspaceMetadata(workspace=workspace):
 
 @task()
 def dataLoadGeoserver(data):
-    geoserverStoreName=os.path.splitext(os.path.basename(data['file']))[0]
-    folderpath =data["folder"].split('/')[-1]
+    geoserverStoreName = data["folder"].split('/')[-1]
     if data['type'] =='shapefile':
-        filename="{0}/{1}".format(data['folder'],geoserverStoreName)
+        shapefileName= os.path.splitext(os.path.basename(data['file']))[0]
+        filename="{0}/{1}".format(data['folder'],shapefileName)
         bbox=createDataStore(geoserverStoreName,filename,format=data['type'])
         data["msg"] = "{0} {1}".format(data["msg"],bbox["msg"])
         data["bounds"]=bbox["solr_geom"]
+    elif data['type']=='image':
+        fileUrl="file:{0}".format(data['file'][1:])
+        bbox=createDataStore(geoserverStoreName,fileUrl,format=data['type'])
+
     return data
 
 @task()
@@ -75,9 +79,30 @@ def createDataStore(name,filename, format="shapefile"):
         solr_geom = 'ENVELOPE({0},{1},{2},{3})'.format(bbox[0],bbox[1],bbox[3],bbox[2])
         return {"solr_geom":solr_geom,"msg":msg}
     elif format == "image":
-        newcs= cat.create_coveragestore2(name,ws)
+        try:
+            newcs= cat.create_coveragestore2(name,ws)
+        except ConflictingDataError as inst:
+            msg = str(inst)
+        except:
+            raise
         newcs.type="GeoTIFF"
-        url="something"
+        newcs.url=filename
+        cat.save(newcs)
+        #add coverage  
+        url="{0}/rest/workspaces/{1}/coveragestores/{2}/coverages.json"
+        url = url.format(geoserver_connection,ws.name,name)
+        coverageName= os.path.splitext(os.path.basename(filename))[0]
+        postdata={"coverage":{"nativeCoverageName":coverageName,"name":coverageName}}
+        #REPROJECT
+        resource=cat.get_resource(name,workspace=ws)
+        resource.projection='EPSG:4326'
+        cat.save(resource)
+        resource.projection_policy='REPROJECT_TO_DECLARED'
+        cat.save(resource)
+        resource.refresh()
+        bbox=resource.latlon_bbox[:4]
+        solr_geom = 'ENVELOPE({0},{1},{2},{3})'.format(bbox[0],bbox[1],bbox[3],bbox[2])
+        return {"solr_geom":solr_geom,"msg":msg}
     return True
 
 #@task()
