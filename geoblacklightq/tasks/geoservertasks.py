@@ -51,7 +51,7 @@ def dataLoadGeoserver(data):
         data["msg"] = "{0} {1}".format(data["msg"],bbox["msg"])
         data["bounds"]=bbox["solr_geom"]
     elif data['type']=='image':
-        fileUrl="file:{0}".format(data['file'][1:])
+        fileUrl="file:{0}".format(data['file'][1:].replace('geoserver-data', 'geoportal_data', 1))
         bbox=createDataStore(geoserverStoreName,fileUrl,format=data['type'])
         data["msg"] = "{0} {1}".format(data["msg"],bbox["msg"])
         data["bounds"]=bbox["solr_geom"]
