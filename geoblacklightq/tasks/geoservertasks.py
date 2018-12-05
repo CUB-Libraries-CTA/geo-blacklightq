@@ -102,6 +102,7 @@ def createDataStore(name,filename, format="shapefile"):
         resource=cat.get_resource(name,workspace=ws)
         resource.projection='EPSG:4326'
         cat.save(resource)
+        resource.refresh()
         resource.projection_policy='REPROJECT_TO_DECLARED'
         cat.save(resource)
         resource.refresh()
