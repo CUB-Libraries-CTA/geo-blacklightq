@@ -69,8 +69,7 @@ def createDataStore(name,filename, format="shapefile"):
         try:
             ft = cat.create_featurestore(name, shapefile, workspace)
         except ConflictingDataError as inst:
-            msg = str(inst)
-        except:
+            msg = str(inst)        except:
             raise
         resource=cat.get_resource(name,workspace=ws)
         resource.projection='EPSG:4326'
@@ -91,7 +90,8 @@ def createDataStore(name,filename, format="shapefile"):
             msg = str(inst)
             newcs= cat.get_store(name)
         except:
-            raise
+            newcs= cat.get_store(name)
+            #raise
         newcs.type="GeoTIFF"
         newcs.url=filename
         cat.save(newcs)
