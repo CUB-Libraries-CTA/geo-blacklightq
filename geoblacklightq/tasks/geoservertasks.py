@@ -2,6 +2,7 @@ from celery.task import task
 from subprocess import call,STDOUT
 from geoserver.catalog import Catalog, ConflictingDataError, FailedRequestError
 from geoserver.util import shapefile_and_friends
+from requests.auth import HTTPBasicAuth
 import requests, os, json, xmltodict
 
 workspace = os.getenv('WRKSPACE',"geocolorado")
@@ -82,25 +83,21 @@ def createDataStore(name,filename, format="shapefile"):
         solr_geom = 'ENVELOPE({0},{1},{2},{3})'.format(bbox[0],bbox[1],bbox[3],bbox[2])
         return {"solr_geom":solr_geom,"msg":msg}
     elif format == "image":
-        try:
+        if cat.get_store(name):
+            newcs= cat.get_store(name,workspace=ws)
+            msg = "Geoserver datastore already existed. Update existing datastore."
+        else:
             newcs= cat.create_coveragestore2(name,ws)
-        except ConflictingDataError as inst:
-            msg = str(inst)
-            newcs= cat.get_store(name)
-        except FailedRequestError as inst:
-            msg = str(inst)
-            newcs= cat.get_store(name)
-        except:
-            newcs= cat.get_store(name)
-            #raise
         newcs.type="GeoTIFF"
         newcs.url=filename
         cat.save(newcs)
         #add coverage
         url="{0}/rest/workspaces/{1}/coveragestores/{2}/coverages.json"
         url = url.format(geoserver_connection,ws.name,name)
+        headers={"Content-Type":"application/json"}
         coverageName= os.path.splitext(os.path.basename(filename))[0]
         postdata={"coverage":{"nativeCoverageName":coverageName,"name":coverageName}}
+        requests.post(url,json.dumps(postdata),headers=headers,auth=(geoserver_username,geoserver_password))
         #REPROJECT
         resource=cat.get_resource(name,workspace=ws)
         resource.projection='EPSG:4326'
