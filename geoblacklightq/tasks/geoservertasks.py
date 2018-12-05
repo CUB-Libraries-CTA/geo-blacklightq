@@ -1,6 +1,6 @@
 from celery.task import task
 from subprocess import call,STDOUT
-from geoserver.catalog import Catalog, ConflictingDataError
+from geoserver.catalog import Catalog, ConflictingDataError, FailedRequestError
 from geoserver.util import shapefile_and_friends
 import requests, os, json, xmltodict
 
@@ -86,6 +86,10 @@ def createDataStore(name,filename, format="shapefile"):
             newcs= cat.create_coveragestore2(name,ws)
         except ConflictingDataError as inst:
             msg = str(inst)
+            newcs= cat.get_store(name)
+        except FailedRequestError as inst:
+            msg = str(inst)
+            newcs= cat.get_store(name)
         except:
             raise
         newcs.type="GeoTIFF"
