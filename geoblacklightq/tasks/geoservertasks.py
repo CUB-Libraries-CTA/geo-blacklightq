@@ -109,6 +109,7 @@ def createDataStore(name,filename, format="shapefile"):
         url="{0}/rest/workspaces/{1}/coveragestores/{2}/coverages/{2}?{3}"
         parameters="recalculate=nativebbox,latlonbbox"
         url = url.format(geoserver_connection,ws.name,name,parameters)
+        headers={"Content-Type":"application/x-www-form-urlencoded"}
         requests.post(url,headers=headers,auth=(geoserver_username,geoserver_password))
         resource.refresh()
         bbox=resource.latlon_bbox[:4]
