@@ -101,10 +101,15 @@ def createDataStore(name,filename, format="shapefile"):
         #REPROJECT
         resource=cat.get_resource(name,workspace=ws)
         resource.projection='EPSG:4326'
-        cat.save(resource)
-        resource.refresh()
+        #cat.save(resource)
         resource.projection_policy='REPROJECT_TO_DECLARED'
         cat.save(resource)
+        #resource.refresh()
+        #Post to recalculate bounding boxes
+        url="{0}/rest/workspaces/{1}/coveragestores/{2}/coverages/{2}?{3}"
+        parameters="recalculate=nativebbox,latlonbbox"
+        url = url.format(geoserver_connection,ws.name,name,parameters)
+        requests.post(url,headers=headers,auth=(geoserver_username,geoserver_password))
         resource.refresh()
         bbox=resource.latlon_bbox[:4]
         solr_geom = 'ENVELOPE({0},{1},{2},{3})'.format(bbox[0],bbox[1],bbox[3],bbox[2])
