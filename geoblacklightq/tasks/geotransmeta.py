@@ -163,10 +163,12 @@ def assignMetaDataComponents(data,type='fgdc'):
     gblight['layer_id_s'] = layername
     gblight['layer_slug_s'] = "cub:{0}".format(layername)
     if data["resource_type"]=='coverage':
-        gblight['layer_geom_type_s'] = "Polygon"
-    else:
         gblight['layer_geom_type_s'] = "Raster"
-    gblight['dc_format_s'] =deep_get(dataJsonObj,"metadata.distInfo.distFormat.formatName.#text","")
+        gblight['dc_format_s'] = "GeoTiff"
+    else:
+        gblight['layer_geom_type_s'] = "Polygon"
+        gblight['dc_format_s'] ="Shapefile"
+    #gblight['dc_format_s'] =deep_get(dataJsonObj,"metadata.distInfo.distFormat.formatName.#text","")
     gblight['dc_language_s'] = "English"
     gblight['dc_type_s'] = "Dataset"
     creator= deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.origin",
