@@ -81,7 +81,7 @@ def createDataStore(name,filename, format="shapefile"):
         resource.refresh()
         bbox=resource.latlon_bbox[:4]
         solr_geom = 'ENVELOPE({0},{1},{2},{3})'.format(bbox[0],bbox[1],bbox[3],bbox[2])
-        return {"solr_geom":solr_geom,"msg":msg}
+        return {"solr_geom":solr_geom,"msg":msg,"resource_type":resource.resource_type}
     elif format == "image":
         if cat.get_store(name):
             newcs= cat.get_store(name,workspace=ws)
@@ -101,7 +101,7 @@ def createDataStore(name,filename, format="shapefile"):
         #REPROJECT
         resource=cat.get_resource(name,workspace=ws)
         resource.projection='EPSG:4326'
-        #cat.save(resource)
+        cat.save(resource)
         resource.projection_policy='REPROJECT_TO_DECLARED'
         cat.save(resource)
         #resource.refresh()
@@ -111,10 +111,10 @@ def createDataStore(name,filename, format="shapefile"):
         url = url.format(geoserver_connection,ws.name,name,parameters)
         headers={"Content-Type":"application/x-www-form-urlencoded"}
         requests.post(url,headers=headers,auth=(geoserver_username,geoserver_password))
-        resource.refresh()
+        #resource.refresh()
         bbox=resource.latlon_bbox[:4]
         solr_geom = 'ENVELOPE({0},{1},{2},{3})'.format(bbox[0],bbox[1],bbox[3],bbox[2])
-        return {"solr_geom":solr_geom,"msg":msg}
+        return {"solr_geom":solr_geom,"msg":msg,"resource_type":resource.resource_type}
     return True
 
 #@task()

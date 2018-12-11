@@ -150,18 +150,22 @@ def assignMetaDataComponents(data,type='fgdc'):
     else:
         dataJsonObj={}
     gblight={}
-    gblight['uuid']= "DO NOT SET"
-    gblight['dc_identifier_s'] = "DO NOT SET"
+    layername=os.path.splitext(os.path.basename(data['file']))[0]
+    gblight['uuid']= "https://geo.colorado.edu/{0}".format(layername)
+    gblight['dc_identifier_s'] = "https://geo.colorado.edu/{0}".format(layername)
     gblight['dc_title_s'] = deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.title",
                 deep_get(dataJsonObj,"metadata.dataIdInfo.idCitation.resTitle",""))
     gblight['dc_description_s'] = deep_get(dataJsonObj,"metadata.idinfo.descript.abstract",
                 re.sub('<[^<]+>', "", deep_get(dataJsonObj,"metadata.dataIdInfo.idAbs","")))
     gblight['dc_rights_s'] = "Public"
     gblight['dct_provenance_s'] = "University of Colorado Boulder"
-    gblight['dct_references_s'] = "DO NOT SET"
-    gblight['layer_id_s'] = "DO NOT SET"
-    gblight['layer_slug_s'] = "DO NOT SET"
-    gblight['layer_geom_type_s'] = ""
+    gblight['dct_references_s'] =  json.dumps({"http://schema.org/downloadUrl":data["zipurl"],"http://www.opengis.net/def/serviceType/ogc/wfs":"https://geo.colorado.edu/geoserver/geocolorado/wfs","http://www.opengis.net/def/serviceType/ogc/wms":"https://geo.colorado.edu/geoserver/geocolorado/wms"})
+    gblight['layer_id_s'] = layername
+    gblight['layer_slug_s'] = "cub:{0}".format(layername)
+    if data["resource_type"]=='coverage':
+        gblight['layer_geom_type_s'] = "Polygon"
+    else:
+        gblight['layer_geom_type_s'] = "Raster"
     gblight['dc_format_s'] =deep_get(dataJsonObj,"metadata.distInfo.distFormat.formatName.#text","")
     gblight['dc_language_s'] = "English"
     gblight['dc_type_s'] = "Dataset"
@@ -170,7 +174,7 @@ def assignMetaDataComponents(data,type='fgdc'):
     gblight['dc_publisher_s'] = creator
     gblight['dc_creator_sm'] = '["{0}"]'.format(creator)
     subjects = deep_get(dataJsonObj,"metadata.idinfo.keywords.theme",
-                deep_get(dataJsonObj,"metadata..dataIdInfo.searchKeys",[]))
+                deep_get(dataJsonObj,"metadata.dataIdInfo.searchKeys",[]))
     subs=findSubject(subjects,"themekey")
     if not subs:
         subs=findSubject(subjects,"keyword")
@@ -183,8 +187,7 @@ def assignMetaDataComponents(data,type='fgdc'):
     if not isinstance(place, list):
         place=[place]
     gblight['dct_spatial_sm'] = json.dumps(place)
-    gblight['solr_geom'] = "DO NOT SET"
-    print(gblight)
+    gblight['solr_geom'] = data["bounds"]
     return gblight
 
 @task()
