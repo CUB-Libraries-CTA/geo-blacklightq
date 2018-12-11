@@ -159,7 +159,7 @@ def assignMetaDataComponents(data,type='fgdc'):
                 re.sub('<[^<]+>', "", deep_get(dataJsonObj,"metadata.dataIdInfo.idAbs","")))
     gblight['dc_rights_s'] = "Public"
     gblight['dct_provenance_s'] = "University of Colorado Boulder"
-    gblight['dct_references_s'] =  json.dumps({"http://schema.org/downloadUrl":data["zipurl"],"http://www.opengis.net/def/serviceType/ogc/wfs":"https://geo.colorado.edu/geoserver/geocolorado/wfs","http://www.opengis.net/def/serviceType/ogc/wms":"https://geo.colorado.edu/geoserver/geocolorado/wms"})
+    gblight['dct_references_s'] =  {"http://schema.org/downloadUrl":data["zipurl"],"http://www.opengis.net/def/serviceType/ogc/wfs":"https://geo.colorado.edu/geoserver/geocolorado/wfs","http://www.opengis.net/def/serviceType/ogc/wms":"https://geo.colorado.edu/geoserver/geocolorado/wms"}
     gblight['layer_id_s'] = layername
     gblight['layer_slug_s'] = "cub:{0}".format(layername)
     if data["resource_type"]=='coverage':
