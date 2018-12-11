@@ -51,11 +51,13 @@ def dataLoadGeoserver(data):
         bbox=createDataStore(geoserverStoreName,filename,format=data['type'])
         data["msg"] = "{0} {1}".format(data["msg"],bbox["msg"])
         data["bounds"]=bbox["solr_geom"]
+        data["resource_type"]=bbox["resource_type"]
     elif data['type']=='image':
         fileUrl="file:{0}".format(data['file'][1:].replace('geoserver-data', 'geoportal_data', 1))
         bbox=createDataStore(geoserverStoreName,fileUrl,format=data['type'])
         data["msg"] = "{0} {1}".format(data["msg"],bbox["msg"])
         data["bounds"]=bbox["solr_geom"]
+        data["resource_type"]=bbox["resource_type"]
     else:
         data["msg"] = "{0} {1}".format(data["msg"],"Data element not georeferenced. IIIF server not implemented.")
     return data
