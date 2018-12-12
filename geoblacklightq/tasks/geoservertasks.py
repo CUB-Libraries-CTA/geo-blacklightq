@@ -119,8 +119,31 @@ def createDataStore(name,filename, format="shapefile"):
         return {"solr_geom":solr_geom,"msg":msg,"resource_type":resource.resource_type}
     return True
 
-#@task()
-#def getBoundingBox(name)
+@task()
+def getstyles():
+    """
+    Returns a list of available Geoserver Styles
+    """
+    url="{0}/rest/styles.json"
+    url=url.format(geoserver_connection)
+    headers={"Content-Type":"application/json"}
+    result=requests.get(url,headers=headers,auth=(geoserver_username,geoserver_password))
+    data=result.json()
+    return data['styles']['style']
+@task()
+def setLayerDefaultStyle(layername,stylename):
+    """
+    Set layer default style
+    args:
+        layername (string)
+        stylename (string)
+    """
+    url="{0}/rest/layers/{1}.json"
+    url=url.format(geoserver_connection,layername)
+    headers={"Content-Type":"application/json"}
+    data={"layer":{"defaultStyle":stylename}}
+    result=requests.put(url,data=json.dumps(data),headers=headers,auth=(geoserver_username,geoserver_password))
+    return {"method":"put","status_code":result.status_code,"msg":result.text}
 
 @task()
 def deleteGeoserverStore(storeName,workspace=workspace, purge=None, recurse=True):
