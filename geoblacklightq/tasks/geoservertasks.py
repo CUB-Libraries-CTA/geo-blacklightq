@@ -143,7 +143,11 @@ def setLayerDefaultStyle(layername,stylename):
     headers={"Content-Type":"application/json"}
     data={"layer":{"defaultStyle":stylename}}
     result=requests.put(url,data=json.dumps(data),headers=headers,auth=(geoserver_username,geoserver_password))
-    return {"method":"put","status_code":result.status_code,"msg":result.text}
+    if not result.text:
+        msg="Geoserver Accepted Default Style"
+    else:
+        msg=result.text
+    return {"method":"put","status_code":result.status_code,"msg":msg}
 
 @task()
 def deleteGeoserverStore(storeName,workspace=workspace, purge=None, recurse=True):
