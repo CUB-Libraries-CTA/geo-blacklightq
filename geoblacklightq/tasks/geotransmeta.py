@@ -102,8 +102,7 @@ def configureGeoData(data,resultDir):
     for xml in xmlfiles:
         shutil.copy(os.path.join(data['folder'],xml),resultDir)
         xmlurls.append(os.path.join(resulturl,resultDir.split('/')[-1],xml))
-        import xmltodict
-
+        #import xmltodict
         with open(os.path.join(data['folder'],xml)) as fd:
             stringxml = fd.read()
             if 'FGDC' in stringxml.upper():
@@ -116,8 +115,14 @@ def configureGeoData(data,resultDir):
     data['xml']={"urls":xmlurls,"fgdc":fgdclist}
     return data
 
+def xml2dict(xmlfile):
+    with open(xmlfile) as fd:
+        stringxml = fd.read()
+        doc = xmltodict.parse(stringxml,cdata_key='text',attr_prefix='',dict_constructor=dict)
+    return doc
+
 @task()
-def crossWalkGeoBlacklight(data, templatename='geoblacklightSchema.tmpl',type='FGDC'):
+def crossWalkGeoBlacklight(data, templatename='geoblacklightSchema.tmpl'):
     """
     Crosswalk
     """
@@ -131,6 +136,56 @@ def crossWalkGeoBlacklight(data, templatename='geoblacklightSchema.tmpl',type='F
     data['geoblacklightschema']=gblight
     return data
 
+@task()
+def json2geoblacklightSchema(xmlfile,layername){
+    """ 
+    This procedure takes an xml file and converts to json. Then runs the json2geoblacklight converstion.
+
+
+    """
+    dataJsonObj=xml2dict(xmlfile)
+    gblight={}
+    gblight['uuid']= "https://geo.colorado.edu/{0}".format(layername)
+    gblight['dc_identifier_s'] = "https://geo.colorado.edu/{0}".format(layername)
+    gblight['dc_title_s'] = deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.title",
+                deep_get(dataJsonObj,"metadata.dataIdInfo.idCitation.resTitle",""))
+    gblight['dc_description_s'] = deep_get(dataJsonObj,"metadata.idinfo.descript.abstract",
+                re.sub('<[^<]+>', "", deep_get(dataJsonObj,"metadata.dataIdInfo.idAbs","")))
+    gblight['dc_rights_s'] = "Public"
+    gblight['dct_provenance_s'] = "University of Colorado Boulder"
+    gblight['dct_references_s'] = "DO NOT SET"
+    gblight['layer_id_s'] = layername
+    gblight['layer_slug_s'] = "cub:{0}".format(layername)
+    if data["resource_type"]=='coverage':
+        gblight['layer_geom_type_s'] = "Raster"
+        gblight['dc_format_s'] = "GeoTiff"
+    else:
+        gblight['layer_geom_type_s'] = "Polygon"
+        gblight['dc_format_s'] ="Shapefile"
+    #gblight['dc_format_s'] =deep_get(dataJsonObj,"metadata.distInfo.distFormat.formatName.#text","")
+    gblight['dc_language_s'] = "English"
+    gblight['dc_type_s'] = "Dataset"
+    creator= deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.origin",
+                deep_get(dataJsonObj,"metadata.dataIdInfo.idCredit",""))
+    gblight['dc_publisher_s'] = creator
+    gblight['dc_creator_sm'] = '["{0}"]'.format(creator)
+    subjects = deep_get(dataJsonObj,"metadata.idinfo.keywords.theme",
+                deep_get(dataJsonObj,"metadata.dataIdInfo.searchKeys",[]))
+    subs=findSubject(subjects,"themekey")
+    if not subs:
+        subs=findSubject(subjects,"keyword")
+    gblight['dc_subject_sm'] = json.dumps(subs)
+    pubdate=deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.pubdate",
+            deep_get(dataJsonObj,"metadata.mdDateSt",""))
+    gblight['dct_issued_s'] = pubdate
+    gblight['dct_temporal_sm'] = '["{0}"]'.format(pubdate)
+    place =deep_get(dataJsonObj,"metadata.idinfo.keywords.place.placekey",[])
+    if not isinstance(place, list):
+        place=[place]
+    gblight['dct_spatial_sm'] = json.dumps(place)
+    gblight['solr_geom'] = data["bounds"]
+    return gblight
+}
 def findSubject(subjects,keyword):
     subs=[]
     try:
