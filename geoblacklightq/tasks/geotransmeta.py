@@ -137,13 +137,24 @@ def crossWalkGeoBlacklight(data, templatename='geoblacklightSchema.tmpl'):
     return data
 
 @task()
-def json2geoblacklightSchema(xmlfile,layername){
+def json2geoblacklightSchema(data,xmlfile=None):
     """ 
     This procedure takes an xml file and converts to json. Then runs the json2geoblacklight converstion.
-
-
+    args: 
+        xmlfile (string) - filelocation 
+        layername (string) - Layername
+    Both of these variable should be available from original workflow
     """
-    dataJsonObj=xml2dict(xmlfile)
+    if xmlfile:
+        dataJsonObj=xml2dict(xmlfile)
+    else:
+        dataJsonObj=deep_get(data,"xml.fgdc",[])
+    if len (dataJsonObj)>0:
+        dataJsonObj=deep_get(dataJsonObj[0],"data",{})
+    else:
+        dataJsonObj={}
+    gblight={}
+    layername=os.path.splitext(os.path.basename(data['file']))[0]
     gblight={}
     gblight['uuid']= "https://geo.colorado.edu/{0}".format(layername)
     gblight['dc_identifier_s'] = "https://geo.colorado.edu/{0}".format(layername)
@@ -185,7 +196,7 @@ def json2geoblacklightSchema(xmlfile,layername){
     gblight['dct_spatial_sm'] = json.dumps(place)
     gblight['solr_geom'] = data["bounds"]
     return gblight
-}
+
 def findSubject(subjects,keyword):
     subs=[]
     try:
