@@ -29,7 +29,7 @@ def resetSolrIndex(items=None):
             query)
         sr = requests.get(url, headers=headers)
         data = sr.json()
-        items = data.results
+        items = data['results']
     queuename = resetSolrIndex.request.delivery_info['routing_key']
     workflow = (solrDeleteIndex.si().set(queue=queuename) |
                 solrIndexItems.si(items).set(queue=queuename))()
