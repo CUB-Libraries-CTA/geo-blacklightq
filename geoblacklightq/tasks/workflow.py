@@ -17,7 +17,7 @@ def resetSolrIndex(items=None):
     """
     Delete current solr index and indexs items sent in Args
     Args:
-        items (list of objects)
+        items (list of objects) defaults to index all  if items not provided.
     returns:
         acknowledgement of workflow submitted.
         Children chain: solrDeleteIndex --> solrIndexItems
