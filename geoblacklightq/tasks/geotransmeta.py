@@ -112,7 +112,7 @@ def configureGeoData(data,resultDir):
                 fgdc['data']=doc
                 fgdclist.append(fgdc)
     data['xmlurls']=xmlurls
-    data['xml']={"urls":xmlurls,"fgdc":fgdclist}
+    data['xml']={"urls":xmlurls,"fgdc":fgdclist,"files":xmlfiles}
     return data
 
 def xml2dict(xmlfile):
