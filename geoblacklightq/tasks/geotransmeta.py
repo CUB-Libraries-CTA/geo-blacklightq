@@ -229,9 +229,11 @@ def assignMetaDataComponents(data,type='fgdc'):
     gblight['uuid']= "https://geo.colorado.edu/{0}".format(layername)
     gblight['dc_identifier_s'] = "https://geo.colorado.edu/{0}".format(layername)
     gblight['dc_title_s'] = deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.title",
-                deep_get(dataJsonObj,"metadata.dataIdInfo.idCitation.resTitle",""))
+                deep_get(dataJsonObj,"metadata.dataIdInfo.idCitation.resTitle",
+                deep_get(dataJsonObj,"gmi:MI_Metadata.gmd:parentIdentifier.gco:CharacterString","")))
     gblight['dc_description_s'] = deep_get(dataJsonObj,"metadata.idinfo.descript.abstract",
-                re.sub('<[^<]+>', "", deep_get(dataJsonObj,"metadata.dataIdInfo.idAbs","")))
+                re.sub('<[^<]+>', "", deep_get(dataJsonObj,"metadata.dataIdInfo.idAbs",
+                deep_get(dataJsonObj,"gmi:MI_Metadata.gmd:identificationInfo.gmd:MD_DataIdentification.gmd:abstract.gco:CharacterString",""))))
     gblight['dc_rights_s'] = "Public"
     gblight['dct_provenance_s'] = "University of Colorado Boulder"
     gblight['dct_references_s'] = "DO NOT SET"
@@ -249,23 +251,22 @@ def assignMetaDataComponents(data,type='fgdc'):
     creator= deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.origin",
                 deep_get(dataJsonObj,"metadata.dataIdInfo.idCredit",""))
     gblight['dc_publisher_s'] = creator
-    gblight['dc_creator_sm'] = '["{0}"]'.format(creator)
+    gblight['dc_creator_sm'] = ["{0}".format(creator)]
     subjects = deep_get(dataJsonObj,"metadata.idinfo.keywords.theme",
                 deep_get(dataJsonObj,"metadata.dataIdInfo.searchKeys",[]))
     subs=findSubject(subjects,"themekey")
     if not subs:
         subs=findSubject(subjects,"keyword")
-    gblight['dc_subject_sm'] = json.dumps(subs)
+    gblight['dc_subject_sm'] = subs
     pubdate=deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.pubdate",
             deep_get(dataJsonObj,"metadata.mdDateSt",""))
     gblight['dct_issued_s'] = pubdate
-    gblight['dct_temporal_sm'] = '["{0}"]'.format(pubdate)
+    gblight['dct_temporal_sm'] = ["{0}".format(pubdate)]
     place =deep_get(dataJsonObj,"metadata.idinfo.keywords.place.placekey",[])
     if not isinstance(place, list):
         place=[place]
-    gblight['dct_spatial_sm'] = json.dumps(place)
+    gblight['dct_spatial_sm'] = place
     gblight['solr_geom'] = data["bounds"]
-    return gblight
 
 @task()
 def geoBoundsMetadata(filename,format="shapefile"):
