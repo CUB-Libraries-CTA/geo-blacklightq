@@ -149,19 +149,21 @@ def json2geoblacklightSchema(data,xmlfile=None):
         dataJsonObj=xml2dict(xmlfile)
     else:
         dataJsonObj=deep_get(data,"xml.fgdc",[])
-    if len (dataJsonObj)>0:
-        dataJsonObj=deep_get(dataJsonObj[0],"data",{})
-    else:
-        dataJsonObj={}
+        if len (dataJsonObj)>0:
+            dataJsonObj=deep_get(dataJsonObj[0],"data",{})
+        else:
+            dataJsonObj={}
     gblight={}
     layername=os.path.splitext(os.path.basename(data['file']))[0]
     gblight={}
     gblight['uuid']= "https://geo.colorado.edu/{0}".format(layername)
     gblight['dc_identifier_s'] = "https://geo.colorado.edu/{0}".format(layername)
     gblight['dc_title_s'] = deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.title",
-                deep_get(dataJsonObj,"metadata.dataIdInfo.idCitation.resTitle",""))
+                deep_get(dataJsonObj,"metadata.dataIdInfo.idCitation.resTitle",
+                deep_get(dataJsonObj,"gmi:MI_Metadata.gmd:parentIdentifier.gco:CharacterString","")))
     gblight['dc_description_s'] = deep_get(dataJsonObj,"metadata.idinfo.descript.abstract",
-                re.sub('<[^<]+>', "", deep_get(dataJsonObj,"metadata.dataIdInfo.idAbs","")))
+                re.sub('<[^<]+>', "", deep_get(dataJsonObj,"metadata.dataIdInfo.idAbs",
+                deep_get(dataJsonObj,"gmi:MI_Metadata.gmd:identificationInfo.gmd:MD_DataIdentification.gmd:abstract.gco:CharacterString",""))))
     gblight['dc_rights_s'] = "Public"
     gblight['dct_provenance_s'] = "University of Colorado Boulder"
     gblight['dct_references_s'] = "DO NOT SET"
