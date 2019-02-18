@@ -164,7 +164,7 @@ def json2geoblacklightSchema(data,xmlfile=None):
                 deep_get(dataJsonObj,"gmi:MI_Metadata.gmd:parentIdentifier.gco:CharacterString","")))
     gblight['dc_description_s'] = deep_get(dataJsonObj,"metadata.idinfo.descript.abstract",
                 re.sub('<[^<]+>', "", deep_get(dataJsonObj,"metadata.dataIdInfo.idAbs",
-                re.sub("(?<=[a-z])\r?\n"," ",deep_get(dataJsonObj,"gmi:MI_Metadata.gmd:identificationInfo.gmd:MD_DataIdentification.gmd:abstract.gco:CharacterString","")))))
+                re.sub("(?<=[a-z])\r?\n"," ",deep_get(dataJsonObj,"gmi:MI_Metadata.gmd:identificationInfo.gmd:MD_DataIdentification.gmd:abstract.gco:CharacterString","").replace("\","")))))
     gblight['dc_rights_s'] = "Public"
     gblight['dct_provenance_s'] = "University of Colorado Boulder"
     gblight['dct_references_s'] = "DO NOT SET"
