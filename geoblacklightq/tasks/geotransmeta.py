@@ -130,9 +130,10 @@ def crossWalkGeoBlacklight(data, templatename='geoblacklightSchema.tmpl'):
     templateLoader = jinja2.FileSystemLoader( searchpath=os.path.dirname(os.path.realpath(__file__)) )
     templateEnv = jinja2.Environment( loader=templateLoader )
     template = templateEnv.get_template("templates/{0}".format(templatename))
-    crosswalkData = template.render(assignMetaDataComponents(data))
-    print(crosswalkData)
-    gblight = json.loads(crosswalkData, strict=False)
+    #crosswalkData = template.render(assignMetaDataComponents(data))
+    #print(crosswalkData)
+    #gblight = json.loads(crosswalkData, strict=False)
+    gblight = assignMetaDataComponents(data)
     gblight['solr_geom']=data['bounds']
     data['geoblacklightschema']=gblight
     return data
@@ -164,7 +165,7 @@ def json2geoblacklightSchema(data,xmlfile=None):
                 deep_get(dataJsonObj,"gmi:MI_Metadata.gmd:parentIdentifier.gco:CharacterString","")))
     gblight['dc_description_s'] = deep_get(dataJsonObj,"metadata.idinfo.descript.abstract",
                 re.sub('<[^<]+>', "", deep_get(dataJsonObj,"metadata.dataIdInfo.idAbs",
-                re.sub('<[^<]+>', "",deep_get(dataJsonObj,"gmi:MI_Metadata.gmd:identificationInfo.gmd:MD_DataIdentification.gmd:abstract.gco:CharacterString","")))))
+                deep_get(dataJsonObj,"gmi:MI_Metadata.gmd:identificationInfo.gmd:MD_DataIdentification.gmd:abstract.gco:CharacterString",""))))
     gblight['dc_rights_s'] = "Public"
     gblight['dct_provenance_s'] = "University of Colorado Boulder"
     gblight['dct_references_s'] = "DO NOT SET"
