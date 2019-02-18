@@ -2,7 +2,7 @@ from celery.task import task
 from subprocess import call,STDOUT
 from requests import exceptions
 from glob import iglob
-import re, fnmatch, jinja2, json
+import re, fnmatch, jinja2, json,ast
 import requests, zipfile, fiona, shutil
 import os, tempfile, rasterio,xmltodict
 
@@ -121,20 +121,25 @@ def xml2dict(xmlfile):
         doc = xmltodict.parse(stringxml,cdata_key='text',attr_prefix='',dict_constructor=dict)
     return doc
 
+def convertStringList(obj):
+    if typle(obj)==str:
+        return ast.literal_eval(obj)
+    return obj
+
 @task()
 def crossWalkGeoBlacklight(data, templatename='geoblacklightSchema.tmpl'):
     """
     Crosswalk
     """
     # load template
-    templateLoader = jinja2.FileSystemLoader( searchpath=os.path.dirname(os.path.realpath(__file__)) )
-    templateEnv = jinja2.Environment( loader=templateLoader )
-    template = templateEnv.get_template("templates/{0}".format(templatename))
+    #templateLoader = jinja2.FileSystemLoader( searchpath=os.path.dirname(os.path.realpath(__file__)) )
+    #templateEnv = jinja2.Environment( loader=templateLoader )
+    #template = templateEnv.get_template("templates/{0}".format(templatename))
     #crosswalkData = template.render(assignMetaDataComponents(data))
     #print(crosswalkData)
     #gblight = json.loads(crosswalkData, strict=False)
     gblight = assignMetaDataComponents(data)
-    gblight['solr_geom']=data['bounds']
+    #gblight['solr_geom']=data['bounds']
     data['geoblacklightschema']=gblight
     return data
 
@@ -183,21 +188,21 @@ def json2geoblacklightSchema(data,xmlfile=None):
     creator= deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.origin",
                 deep_get(dataJsonObj,"metadata.dataIdInfo.idCredit",""))
     gblight['dc_publisher_s'] = creator
-    gblight['dc_creator_sm'] = '["{0}"]'.format(creator)
+    gblight['dc_creator_sm'] = ["{0}".format(creator)]
     subjects = deep_get(dataJsonObj,"metadata.idinfo.keywords.theme",
                 deep_get(dataJsonObj,"metadata.dataIdInfo.searchKeys",[]))
     subs=findSubject(subjects,"themekey")
     if not subs:
         subs=findSubject(subjects,"keyword")
-    gblight['dc_subject_sm'] = json.dumps(subs)
+    gblight['dc_subject_sm'] = subs
     pubdate=deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.pubdate",
             deep_get(dataJsonObj,"metadata.mdDateSt",""))
     gblight['dct_issued_s'] = pubdate
-    gblight['dct_temporal_sm'] = '["{0}"]'.format(pubdate)
+    gblight['dct_temporal_sm'] = ["{0}".format(pubdate)]
     place =deep_get(dataJsonObj,"metadata.idinfo.keywords.place.placekey",[])
     if not isinstance(place, list):
         place=[place]
-    gblight['dct_spatial_sm'] = json.dumps(place)
+    gblight['dct_spatial_sm'] = place
     gblight['solr_geom'] = data["bounds"]
     return gblight
 
