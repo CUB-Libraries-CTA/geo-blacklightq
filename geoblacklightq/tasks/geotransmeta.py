@@ -267,6 +267,7 @@ def assignMetaDataComponents(data,type='fgdc'):
         place=[place]
     gblight['dct_spatial_sm'] = place
     gblight['solr_geom'] = data["bounds"]
+    return gblight
 
 @task()
 def geoBoundsMetadata(filename,format="shapefile"):
