@@ -99,18 +99,22 @@ def configureGeoData(data,resultDir):
     xmlfiles = findfiles(['*.xml'],where=data["folder"])
     xmlurls=[]
     fgdclist=[]
+    #xmlselect=[]
     for xml in xmlfiles:
         shutil.copy(os.path.join(data['folder'],xml),resultDir)
         xmlurls.append(os.path.join(resulturl,resultDir.split('/')[-1],xml))
         #import xmltodict
+        localfilename=os.path.join(data['folder'],xml)
+        #xmlselect.append({"file":localfilename,"url":os.path.join(resulturl,resultDir.split('/')[-1],xml)})
         with open(os.path.join(data['folder'],xml)) as fd:
             stringxml = fd.read()
-            if 'FGDC' in stringxml.upper():
-                fgdc={}
-                fgdc['url']=os.path.join(resulturl,resultDir.split('/')[-1],xml)
-                doc = xmltodict.parse(stringxml,cdata_key='text',attr_prefix='',dict_constructor=dict)
-                fgdc['data']=doc
-                fgdclist.append(fgdc)
+            #if 'FGDC' in stringxml.upper():
+            fgdc={}
+            fgdc['url']=os.path.join(resulturl,resultDir.split('/')[-1],xml)
+            doc = xmltodict.parse(stringxml,cdata_key='text',attr_prefix='',dict_constructor=dict)
+            fgdc['data']=doc
+            fgdc['file']=localfilename
+            fgdclist.append(fgdc)
     data['xmlurls']=xmlurls
     data['xml']={"urls":xmlurls,"fgdc":fgdclist,"files":xmlfiles}
     return data
