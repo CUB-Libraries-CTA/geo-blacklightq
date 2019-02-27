@@ -89,6 +89,8 @@ def createDataStore(name, filename, format="shapefile"):
         except:
             raise
         try:
+            print(dir(ft))
+            print(type(ft))
             print(ft.title)
             print(ft.native_name)
         except:
