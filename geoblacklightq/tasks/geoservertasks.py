@@ -117,14 +117,8 @@ def createDataStore(name, filename, format="shapefile"):
                                  'projectionPolicy': 'REPROJECT_TO_DECLARED', 'srs': 'EPSG:4326'}}
         requests.post(url, json.dumps(postdata), headers=headers,
                       auth=(geoserver_username, geoserver_password))
-        # REPROJECT
+        # Reproject
         resource = cat.get_resource(name, workspace=ws)
-        # resource.projection='EPSG:4326'
-        # cat.save(resource)
-        # resource.projection_policy='REPROJECT_TO_DECLARED'
-        # cat.save(resource)
-        # resource.refresh()
-        # Post to recalculate bounding boxes
         url = "{0}/rest/workspaces/{1}/coveragestores/{2}/coverages/{2}?{3}"
         parameters = "recalculate=nativebbox,latlonbbox"
         url = url.format(geoserver_connection, ws.name, name, parameters)
