@@ -231,7 +231,7 @@ def assignMetaDataComponents(data,type='fgdc'):
     else:
         dataJsonObj={}
     gblight={}
-    layername=os.path.splitext(os.path.basename(data['file']))[0]
+    layername=data['geoserverStoreName'] #os.path.splitext(os.path.basename(data['file']))[0]
     gblight['uuid']= "https://geo.colorado.edu/{0}".format(layername)
     gblight['dc_identifier_s'] = "https://geo.colorado.edu/{0}".format(layername)
     gblight['dc_title_s'] = deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.title",
