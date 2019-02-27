@@ -71,6 +71,7 @@ def dataLoadGeoserver(data):
     else:
         data["msg"] = "{0} {1}".format(
             data["msg"], "Data element not georeferenced. IIIF server not implemented.")
+    data['geoserverStoreName'] = geoserverStoreName
     return data
 
 
@@ -89,10 +90,8 @@ def createDataStore(name, filename, format="shapefile"):
         except:
             raise
         try:
-            print(dir(ft))
-            print(type(ft))
-            print(ft.title)
-            print(ft.native_name)
+            print(ft['title'])
+            print(ft['native_name'])
         except:
             print("EEERRROR")
         resource = cat.get_resource(name, workspace=ws)

@@ -166,7 +166,7 @@ def json2geoblacklightSchema(data,xmlfile=None,type='url'):
         else:
             dataJsonObj={}
     gblight={}
-    layername=os.path.splitext(os.path.basename(data['file']))[0]
+    layername=data['geoserverStoreName'] #os.path.splitext(os.path.basename(data['file']))[0]
     gblight={}
     gblight['uuid']= "https://geo.colorado.edu/{0}".format(layername)
     gblight['dc_identifier_s'] = "https://geo.colorado.edu/{0}".format(layername)
