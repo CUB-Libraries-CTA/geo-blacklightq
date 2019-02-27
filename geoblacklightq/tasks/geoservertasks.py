@@ -84,16 +84,11 @@ def createDataStore(name, filename, format="shapefile"):
     if format == "shapefile":
         shapefile = shapefile_and_friends(filename)
         try:
-            ft = cat.create_featurestore(name, shapefile, workspace)
+            cat.create_featurestore(name, shapefile, workspace)
         except ConflictingDataError as inst:
             msg = str(inst)
         except:
             raise
-        try:
-            print(ft['title'])
-            print(ft['native_name'])
-        except:
-            print("EEERRROR")
         resource = cat.get_resource(name, workspace=ws)
         resource.projection = 'EPSG:4326'
         cat.save(resource)
