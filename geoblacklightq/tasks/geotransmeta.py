@@ -126,7 +126,7 @@ def xml2dict(xmlfile):
     return doc
 
 def convertStringList(obj):
-    if typle(obj)==str:
+    if type(obj)==str:
         return ast.literal_eval(obj)
     return obj
 
