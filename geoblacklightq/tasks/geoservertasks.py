@@ -21,6 +21,27 @@ def getBoundingBox(owsBBox):
     return solr_geom.format(lc[0], uc[0], uc[1], lc[1])
 
 
+def determineFeatureGeometry(layername):
+    url = "{0}/rest/workspaces/geocolorado/featuretypes/{1}.json".format(
+        geoserver_connection, layername)
+    headers = {"Content-Type": "application/json"}
+    req = requests.get(url, headers=headers, auth=(
+        geoserver_username, geoserver_password))
+    data = req.json()
+    geom = ''
+    try:
+        for itm in data['featureType']['attributes']['attribute']:
+            if itm['name'] == 'the_geom':
+                geom = itm['binding'].split('.')[-1]
+                break
+    except:
+        pass
+    if geom in ["Polygon", "Line", "Point", "MultiPolygon", "MultiLineString", "MultiPoint"]:
+        return geom
+    else:
+        return "UNDETERMINED"
+
+
 @task()
 def geoserverGetWorkspaceMetadata(workspace=workspace):
     """

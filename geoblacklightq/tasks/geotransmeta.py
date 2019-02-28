@@ -2,6 +2,7 @@ from celery.task import task
 from subprocess import call,STDOUT
 from requests import exceptions
 from glob import iglob
+from .geoservertasks import determineFeatureGeometry
 import re, fnmatch, jinja2, json,ast
 import requests, zipfile, fiona, shutil
 import os, tempfile, rasterio,xmltodict
@@ -224,6 +225,7 @@ def findSubject(subjects,keyword):
         subs.append(str(inst))
     return subs
 
+
 def assignMetaDataComponents(data,type='fgdc'):
     dataJsonObj=deep_get(data,"xml.fgdc",[])
     if len (dataJsonObj)>0:
@@ -231,7 +233,7 @@ def assignMetaDataComponents(data,type='fgdc'):
     else:
         dataJsonObj={}
     gblight={}
-    layername=data['geoserverStoreName'] #os.path.splitext(os.path.basename(data['file']))[0]
+    layername=os.path.splitext(os.path.basename(data['file']))[0]
     gblight['uuid']= "https://geo.colorado.edu/{0}".format(layername)
     gblight['dc_identifier_s'] = "https://geo.colorado.edu/{0}".format(layername)
     gblight['dc_title_s'] = deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.title",
@@ -243,13 +245,14 @@ def assignMetaDataComponents(data,type='fgdc'):
     gblight['dc_rights_s'] = "Public"
     gblight['dct_provenance_s'] = "University of Colorado Boulder"
     gblight['dct_references_s'] = "DO NOT SET"
-    gblight['layer_id_s'] = layername
+    gblight['layer_id_s'] = data['geoserverStoreName'] 
     gblight['layer_slug_s'] = "cub:{0}".format(layername)
     if data["resource_type"]=='coverage':
         gblight['layer_geom_type_s'] = "Raster"
         gblight['dc_format_s'] = "GeoTiff"
     else:
-        gblight['layer_geom_type_s'] = "Polygon"
+        gblight['layer_geom_type_s'] = determineFeatureGeometry(data['geoserverStoreName'])
+        #gblight['layer_geom_type_s'] = "Polygon"
         gblight['dc_format_s'] ="Shapefile"
     #gblight['dc_format_s'] =deep_get(dataJsonObj,"metadata.distInfo.distFormat.formatName.#text","")
     gblight['dc_language_s'] = "English"
