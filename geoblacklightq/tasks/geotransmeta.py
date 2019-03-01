@@ -144,28 +144,36 @@ def convertStringList(obj):
     return obj
 
 @task()
-def crossWalkGeoBlacklight(data, layername=None,geoserver_layername=None,resource_type=None):
+def singleCrossWalkGeoBlacklight(filename, layername,geoserver_layername,resource_type):
     """
-    Crosswalk
+    Single XML file crosswalk to GeoBlacklight schema
+
     """
-    if layername:
-        if not geoserver_layername:
-            geoserver_layername=layername
-        gblight = assignMetaDataComponents(data,layername,geoserver_layername,resource_type)
-        gblight['solr_geom']=getGeoServerBoundingBox(geoserver_layername)
-        return gblight
+    doc={}
+    with open(filename) as fd:
+        stringxml = fd.read()
+        doc = xmltodict.parse(stringxml,cdata_key='text',attr_prefix='',dict_constructor=dict)
+    gblight = assignMetaDataComponents(doc,layername,geoserver_layername,resource_type)
+    gblight['solr_geom']=getGeoServerBoundingBox(geoserver_layername)
+    return gblight
+
+@task()
+def crossWalkGeoBlacklight(data):
+    """
+    Workflow Crosswalk to GeoBlacklight schema
+    """
+
+    dataJsonObj=deep_get(data,"xml.fgdc",[])
+    if len (dataJsonObj)>0:
+        dataJsonObj=deep_get(dataJsonObj[0],"data",{})
     else:
-        dataJsonObj=deep_get(data,"xml.fgdc",[])
-        if len (dataJsonObj)>0:
-            dataJsonObj=deep_get(dataJsonObj[0],"data",{})
-        else:
-            dataJsonObj={}
-        layername=os.path.splitext(os.path.basename(data['file']))[0]
-        geoserver_layername = data['geoserverStoreName']
-        gblight = assignMetaDataComponents(dataJsonObj,layername,geoserver_layername,data["resource_type"])
-        gblight['solr_geom']=data['bounds']
-        data['geoblacklightschema']=gblight
-        return data
+        dataJsonObj={}
+    layername=os.path.splitext(os.path.basename(data['file']))[0]
+    geoserver_layername = data['geoserverStoreName']
+    gblight = assignMetaDataComponents(dataJsonObj,layername,geoserver_layername,data["resource_type"])
+    gblight['solr_geom']=data['bounds']
+    data['geoblacklightschema']=gblight
+    return data
 
 def findSubject(subjects,keyword):
     subs=[]
@@ -183,12 +191,20 @@ def findTitle(dataJsonObj):
         deep_get(dataJsonObj,"metadata.dataIdInfo.idCitation.resTitle",
         deep_get(dataJsonObj,"gmi:MI_Metadata.gmd:parentIdentifier.gco:CharacterString","")))
     if type(title)==dict:
-        print(dict)
         try:
             title=title['text']
         except:
             pass
     return u'{0}'.format(title)
+def findDataIssued(dataJsonObj):
+    pubdate=deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.pubdate",
+            deep_get(dataJsonObj,"metadata.mdDateSt",""))
+    if type(pubdate)==dict:
+        try:
+            pubdate=pubdate['text']
+        except:
+            pass
+    return u'{0}'.format(pubdate)
 
 def assignMetaDataComponents(dataJsonObj,layername,geoserver_layername,resource_type):
     #dataJsonObj=deep_get(data,"xml.fgdc",[])
@@ -229,8 +245,7 @@ def assignMetaDataComponents(dataJsonObj,layername,geoserver_layername,resource_
     if not subs:
         subs=findSubject(subjects,"keyword")
     gblight['dc_subject_sm'] = subs
-    pubdate=deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.pubdate",
-            deep_get(dataJsonObj,"metadata.mdDateSt",""))
+    pubdate=findDataIssued(dataJsonObj)
     gblight['dct_issued_s'] = pubdate
     gblight['dct_temporal_sm'] = [u"{0}".format(pubdate)]
     place =deep_get(dataJsonObj,"metadata.idinfo.keywords.place.placekey",[])
