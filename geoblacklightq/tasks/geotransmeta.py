@@ -260,7 +260,7 @@ def assignMetaDataComponents(data,type='fgdc'):
     creator= deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.origin",
                 deep_get(dataJsonObj,"metadata.dataIdInfo.idCredit",""))
     gblight['dc_publisher_s'] = creator
-    gblight['dc_creator_sm'] = ["{0}".format(creator)]
+    gblight['dc_creator_sm'] = [u"{0}".format(creator)]
     subjects = deep_get(dataJsonObj,"metadata.idinfo.keywords.theme",
                 deep_get(dataJsonObj,"metadata.dataIdInfo.searchKeys",[]))
     subs=findSubject(subjects,"themekey")
@@ -270,7 +270,7 @@ def assignMetaDataComponents(data,type='fgdc'):
     pubdate=deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.pubdate",
             deep_get(dataJsonObj,"metadata.mdDateSt",""))
     gblight['dct_issued_s'] = pubdate
-    gblight['dct_temporal_sm'] = ["{0}".format(pubdate)]
+    gblight['dct_temporal_sm'] = [u"{0}".format(pubdate)]
     place =deep_get(dataJsonObj,"metadata.idinfo.keywords.place.placekey",[])
     if not isinstance(place, list):
         place=[place]
