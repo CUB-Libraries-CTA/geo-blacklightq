@@ -228,7 +228,7 @@ def findTitle(dataJsonObj):
     title = deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.title",
         deep_get(dataJsonObj,"metadata.dataIdInfo.idCitation.resTitle",
         deep_get(dataJsonObj,"gmi:MI_Metadata.gmd:parentIdentifier.gco:CharacterString","")))
-    if type(tile)==dict:
+    if type(title)==dict:
         print(dict)
         try:
             title=title['text']
