@@ -97,6 +97,18 @@ def dataLoadGeoserver(data):
 
 
 @task()
+def getGeoServerBoundingBox(geoserver_layername):
+    cat = Catalog("{0}/rest/".format(geoserver_connection),
+                  geoserver_username, geoserver_password)
+    ws = cat.get_workspace(workspace)
+    resource = cat.get_resource(geoserver_layername, workspace=ws)
+    bbox = resource.latlon_bbox[:4]
+    solr_geom = 'ENVELOPE({0},{1},{2},{3})'.format(
+        bbox[0], bbox[1], bbox[3], bbox[2])
+    return solr_geom
+
+
+@task()
 def createDataStore(name, filename, format="shapefile"):
     cat = Catalog("{0}/rest/".format(geoserver_connection),
                   geoserver_username, geoserver_password)

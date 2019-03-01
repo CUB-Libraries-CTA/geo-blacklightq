@@ -2,7 +2,7 @@ from celery.task import task
 from subprocess import call,STDOUT
 from requests import exceptions
 from glob import iglob
-from .geoservertasks import determineFeatureGeometry
+from .geoservertasks import determineFeatureGeometry, getGeoServerBoundingBox
 import re, fnmatch, jinja2, json,ast
 import requests, zipfile, fiona, shutil
 import os, tempfile, rasterio,xmltodict
@@ -24,6 +24,12 @@ def findfiles(patterns, where='.'):
     return list(set(result))
 
 def deep_get(_dict, keys, default=None):
+    """
+    Deep get on python dictionary. Key is in dot notation.
+    Returns value if found. Default returned if not found.
+
+    Default can be set to another deep_get function.
+    """
     keys=keys.split('.')
     def _reducer(d, key):
         if isinstance(d, dict):
@@ -69,6 +75,9 @@ def unzip(filename,destination=None,force=False):
 
 @task()
 def determineTypeBounds(data):
+    """
+    Determine if a shapefile, image, or non georeferenced iiif. Then determines bounds within original projection.
+    """
     folder= data["folder"]
     msg = "Initial upload"
     if not data["zipdata"]:
@@ -97,6 +106,9 @@ def determineTypeBounds(data):
 
 @task()
 def configureGeoData(data,resultDir):
+    """
+    Finds all xml files within upload dataset. Reads, parses, and converts to python dictionary.
+    """
     xmlfiles = findfiles(['*.xml'],where=data["folder"])
     xmlurls=[]
     fgdclist=[]
@@ -132,86 +144,28 @@ def convertStringList(obj):
     return obj
 
 @task()
-def crossWalkGeoBlacklight(data, templatename='geoblacklightSchema.tmpl'):
+def crossWalkGeoBlacklight(data, layername=None,geoserver_layername=None,resource_type=None):
     """
     Crosswalk
     """
-    # load template
-    #templateLoader = jinja2.FileSystemLoader( searchpath=os.path.dirname(os.path.realpath(__file__)) )
-    #templateEnv = jinja2.Environment( loader=templateLoader )
-    #template = templateEnv.get_template("templates/{0}".format(templatename))
-    #crosswalkData = template.render(assignMetaDataComponents(data))
-    #print(crosswalkData)
-    #gblight = json.loads(crosswalkData, strict=False)
-    gblight = assignMetaDataComponents(data)
-    #gblight['solr_geom']=data['bounds']
-    data['geoblacklightschema']=gblight
-    return data
-
-@task()
-def json2geoblacklightSchema(data,xmlfile=None,type='url'):
-    """ 
-    This procedure takes an xml file and converts to json. Then runs the json2geoblacklight converstion.
-    args: 
-        xmlfile (string) - filelocation 
-        layername (string) - Layername
-    Both of these variable should be available from original workflow
-    """
-    #layername=os.path.splitext(os.path.basename(data['file']))[0]
-    if xmlfile:
-        dataJsonObj=xml2dict(xmlfile)
+    if layername:
+        if not geoserver_layername:
+            geoserver_layername=layername
+        gblight = assignMetaDataComponents(data,layername,geoserver_layername,resource_type)
+        gblight['solr_geom']=getGeoServerBoundingBox(geoserver_layername)
+        return gblight
     else:
         dataJsonObj=deep_get(data,"xml.fgdc",[])
         if len (dataJsonObj)>0:
             dataJsonObj=deep_get(dataJsonObj[0],"data",{})
         else:
             dataJsonObj={}
-    gblight={}
-    layername=data['geoserverStoreName'] #os.path.splitext(os.path.basename(data['file']))[0]
-    gblight={}
-    gblight['uuid']= "https://geo.colorado.edu/{0}".format(layername)
-    gblight['dc_identifier_s'] = "https://geo.colorado.edu/{0}".format(layername)
-    gblight['dc_title_s'] = deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.title",
-                deep_get(dataJsonObj,"metadata.dataIdInfo.idCitation.resTitle",
-                deep_get(dataJsonObj,"gmi:MI_Metadata.gmd:parentIdentifier.gco:CharacterString","")))
-    gblight['dc_description_s'] = deep_get(dataJsonObj,"metadata.idinfo.descript.abstract",
-                re.sub('<[^<]+>', "", deep_get(dataJsonObj,"metadata.dataIdInfo.idAbs",
-                deep_get(dataJsonObj,"gmi:MI_Metadata.gmd:identificationInfo.gmd:MD_DataIdentification.gmd:abstract.gco:CharacterString",""))))
-    gblight['dc_rights_s'] = "Public"
-    gblight['dct_provenance_s'] = "University of Colorado Boulder"
-    gblight['dct_references_s'] = "DO NOT SET"
-    gblight['layer_id_s'] = layername
-    gblight['layer_slug_s'] = "cub:{0}".format(layername)
-    if data["resource_type"]=='coverage':
-        gblight['layer_geom_type_s'] = "Raster"
-        gblight['dc_format_s'] = "GeoTiff"
-    else:
-        gblight['layer_geom_type_s'] = "Polygon"
-        gblight['dc_format_s'] ="Shapefile"
-    #gblight['dc_format_s'] =deep_get(dataJsonObj,"metadata.distInfo.distFormat.formatName.#text","")
-    gblight['dc_language_s'] = "English"
-    gblight['dc_type_s'] = "Dataset"
-    creator= deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.origin",
-                deep_get(dataJsonObj,"metadata.dataIdInfo.idCredit",""))
-    gblight['dc_publisher_s'] = creator
-    gblight['dc_creator_sm'] = ["{0}".format(creator)]
-    subjects = deep_get(dataJsonObj,"metadata.idinfo.keywords.theme",
-                deep_get(dataJsonObj,"metadata.dataIdInfo.searchKeys",[]))
-    subs=findSubject(subjects,"themekey")
-    if not subs:
-        subs=findSubject(subjects,"keyword")
-    gblight['dc_subject_sm'] = subs
-    pubdate=deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.pubdate",
-            deep_get(dataJsonObj,"metadata.mdDateSt",""))
-    gblight['dct_issued_s'] = pubdate
-    gblight['dct_temporal_sm'] = ["{0}".format(pubdate)]
-    place =deep_get(dataJsonObj,"metadata.idinfo.keywords.place.placekey",[])
-    if not isinstance(place, list):
-        place=[place]
-    gblight['dct_spatial_sm'] = place
-    gblight['solr_geom'] = data["bounds"]
-    data['geoblacklightschema']=gblight
-    return data
+        layername=os.path.splitext(os.path.basename(data['file']))[0]
+        geoserver_layername = data['geoserverStoreName']
+        gblight = assignMetaDataComponents(dataJsonObj,layername,geoserver_layername,data["resource_type"])
+        gblight['solr_geom']=data['bounds']
+        data['geoblacklightschema']=gblight
+        return data
 
 def findSubject(subjects,keyword):
     subs=[]
@@ -236,14 +190,14 @@ def findTitle(dataJsonObj):
             pass
     return u'{0}'.format(title)
 
-def assignMetaDataComponents(data,type='fgdc'):
-    dataJsonObj=deep_get(data,"xml.fgdc",[])
-    if len (dataJsonObj)>0:
-        dataJsonObj=deep_get(dataJsonObj[0],"data",{})
-    else:
-        dataJsonObj={}
+def assignMetaDataComponents(dataJsonObj,layername,geoserver_layername,resource_type):
+    #dataJsonObj=deep_get(data,"xml.fgdc",[])
+    #if len (dataJsonObj)>0:
+    #    dataJsonObj=deep_get(dataJsonObj[0],"data",{})
+    #else:
+    #    dataJsonObj={}
     gblight={}
-    layername=os.path.splitext(os.path.basename(data['file']))[0]
+    #layername=os.path.splitext(os.path.basename(data['file']))[0]
     gblight['uuid']= "https://geo.colorado.edu/{0}".format(layername)
     gblight['dc_identifier_s'] = "https://geo.colorado.edu/{0}".format(layername)
     gblight['dc_title_s'] = findTitle(dataJsonObj)
@@ -253,13 +207,13 @@ def assignMetaDataComponents(data,type='fgdc'):
     gblight['dc_rights_s'] = "Public"
     gblight['dct_provenance_s'] = "University of Colorado Boulder"
     gblight['dct_references_s'] = "DO NOT SET"
-    gblight['layer_id_s'] = data['geoserverStoreName'] 
+    gblight['layer_id_s'] = geoserver_layername 
     gblight['layer_slug_s'] = "cub:{0}".format(layername)
-    if data["resource_type"]=='coverage':
+    if resource_type=='coverage':
         gblight['layer_geom_type_s'] = "Raster"
         gblight['dc_format_s'] = "GeoTiff"
     else:
-        gblight['layer_geom_type_s'] = determineFeatureGeometry(data['geoserverStoreName'])
+        gblight['layer_geom_type_s'] = determineFeatureGeometry(geoserver_layername)
         #gblight['layer_geom_type_s'] = "Polygon"
         gblight['dc_format_s'] ="Shapefile"
     #gblight['dc_format_s'] =deep_get(dataJsonObj,"metadata.distInfo.distFormat.formatName.#text","")
@@ -283,7 +237,6 @@ def assignMetaDataComponents(data,type='fgdc'):
     if not isinstance(place, list):
         place=[place]
     gblight['dct_spatial_sm'] = place
-    gblight['solr_geom'] = data["bounds"]
     return gblight
 
 @task()
