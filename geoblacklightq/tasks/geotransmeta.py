@@ -224,7 +224,17 @@ def findSubject(subjects,keyword):
     except Exception as inst:
         subs.append(str(inst))
     return subs
-
+def findTitle(dataJsonObj):
+    title = deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.title",
+        deep_get(dataJsonObj,"metadata.dataIdInfo.idCitation.resTitle",
+        deep_get(dataJsonObj,"gmi:MI_Metadata.gmd:parentIdentifier.gco:CharacterString","")))
+    if type(tile)==dict:
+        print(dict)
+        try:
+            title=title['text']
+        except:
+            pass
+    return u'{0}'.format(title)
 
 def assignMetaDataComponents(data,type='fgdc'):
     dataJsonObj=deep_get(data,"xml.fgdc",[])
@@ -236,9 +246,7 @@ def assignMetaDataComponents(data,type='fgdc'):
     layername=os.path.splitext(os.path.basename(data['file']))[0]
     gblight['uuid']= "https://geo.colorado.edu/{0}".format(layername)
     gblight['dc_identifier_s'] = "https://geo.colorado.edu/{0}".format(layername)
-    gblight['dc_title_s'] = deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.title",
-                deep_get(dataJsonObj,"metadata.dataIdInfo.idCitation.resTitle",
-                deep_get(dataJsonObj,"gmi:MI_Metadata.gmd:parentIdentifier.gco:CharacterString","")))
+    gblight['dc_title_s'] = findTitle(dataJsonObj)
     gblight['dc_description_s'] = deep_get(dataJsonObj,"metadata.idinfo.descript.abstract",
                 re.sub('<[^<]+>', "", deep_get(dataJsonObj,"metadata.dataIdInfo.idAbs",
                 deep_get(dataJsonObj,"gmi:MI_Metadata.gmd:identificationInfo.gmd:MD_DataIdentification.gmd:abstract.gco:CharacterString",""))))
