@@ -2,7 +2,7 @@ from celery.task import task
 from subprocess import call,STDOUT
 from requests import exceptions
 from glob import iglob
-from .geoservertasks import determineFeatureGeometry, getGeoServerBoundingBox
+from .geoservertasks import determineFeatureGeometry, getGeoServerBoundingBox, getLayerDefaultStyle
 import re, fnmatch, jinja2, json,ast
 import requests, zipfile, fiona, shutil
 import os, tempfile, rasterio,xmltodict
@@ -252,6 +252,8 @@ def assignMetaDataComponents(dataJsonObj,layername,geoserver_layername,resource_
     if not isinstance(place, list):
         place=[place]
     gblight['dct_spatial_sm'] = place
+    gblight['status']="indexed"
+    gblight['style']= getLayerDefaultStyle(geoserver_layername)
     return gblight
 
 @task()

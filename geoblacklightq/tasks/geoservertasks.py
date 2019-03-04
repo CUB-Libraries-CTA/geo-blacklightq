@@ -181,6 +181,23 @@ def getstyles():
 
 
 @task()
+def getLayerDefaultStyle(layername):
+    """
+    Return default style for layer
+    args:
+        layername (string)
+    return:
+        style name (string)
+    """
+    url = "{0}/rest/{1}.json".format(geoserver_connection, layername)
+    headers = {"Content-Type": "application/json"}
+    result = requests.get(url, headers=headers, auth=(
+        geoserver_username, geoserver_password))
+    data = result.json()
+    return data['layer']['defaultStyle']['name']
+
+
+@task()
 def setLayerDefaultStyle(layername, stylename):
     """
     Set layer default style
