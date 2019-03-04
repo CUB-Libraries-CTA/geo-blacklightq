@@ -189,7 +189,7 @@ def getLayerDefaultStyle(layername):
     return:
         style name (string)
     """
-    url = "{0}/rest/{1}.json".format(geoserver_connection, layername)
+    url = "{0}/rest/layers/{1}.json".format(geoserver_connection, layername)
     headers = {"Content-Type": "application/json"}
     result = requests.get(url, headers=headers, auth=(
         geoserver_username, geoserver_password))
