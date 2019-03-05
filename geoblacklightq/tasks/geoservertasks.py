@@ -72,7 +72,8 @@ def geoserverGetWorkspaceMetadata(workspace=workspace):
 
 @task()
 def dataLoadGeoserver(data):
-    geoserverStoreName = data["folder"].split('/')[-1]
+    geoserverStoreName = data["folder"].split(
+        '/')[-1].lower().replace(' ', '_').replace('(', '').replace(')', '')
     if data['type'] == 'shapefile':
         shapefileName = os.path.splitext(os.path.basename(data['file']))[0]
         filename = "{0}/{1}".format(data['folder'], shapefileName)
