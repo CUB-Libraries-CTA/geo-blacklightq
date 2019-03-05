@@ -238,23 +238,26 @@ def assignMetaDataComponents(dataJsonObj,layername,geoserver_layername,resource_
     creator= deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.origin",
                 deep_get(dataJsonObj,"metadata.dataIdInfo.idCredit",""))
     gblight['dc_publisher_s'] = creator
-    gblight['dc_creator_sm'] = [u"{0}".format(creator)]
+    gblight['dc_creator_sm'] = cleanBlanksFromList([u"{0}".format(creator)])
     subjects = deep_get(dataJsonObj,"metadata.idinfo.keywords.theme",
                 deep_get(dataJsonObj,"metadata.dataIdInfo.searchKeys",[]))
     subs=findSubject(subjects,"themekey")
     if not subs:
         subs=findSubject(subjects,"keyword")
-    gblight['dc_subject_sm'] = subs
+    gblight['dc_subject_sm'] = cleanBlanksFromList(subs)
     pubdate=findDataIssued(dataJsonObj)
     gblight['dct_issued_s'] = pubdate
-    gblight['dct_temporal_sm'] = [u"{0}".format(pubdate)]
+    gblight['dct_temporal_sm'] = cleanBlanksFromList([u"{0}".format(pubdate)])
     place =deep_get(dataJsonObj,"metadata.idinfo.keywords.place.placekey",[])
     if not isinstance(place, list):
         place=[place]
-    gblight['dct_spatial_sm'] = place
+    gblight['dct_spatial_sm'] = cleanBlanksFromList(place)
     gblight['status']="indexed"
     gblight['style']= getLayerDefaultStyle(geoserver_layername)
     return gblight
+
+def cleanBlanksFromList(datalist):
+    return [x for x in datalist if x]
 
 @task()
 def geoBoundsMetadata(filename,format="shapefile"):
