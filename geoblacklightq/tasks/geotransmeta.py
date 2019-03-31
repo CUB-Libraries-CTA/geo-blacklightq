@@ -214,25 +214,25 @@ def assignMetaDataComponents(dataJsonObj,layername,geoserver_layername,resource_
     #    dataJsonObj={}
     gblight={}
     #layername=os.path.splitext(os.path.basename(data['file']))[0]
-    gblight['uuid']= "https://geo.colorado.edu/{0}".format(layername)
-    gblight['dc_identifier_s'] = "https://geo.colorado.edu/{0}".format(layername)
+    gblight['uuid']= "https://ark.colorado.edu/ark:47540/" #.format(layername)
+    gblight['dc_identifier_s'] = "https://ark.colorado.edu/ark:47540/" #.format(layername)
     gblight['dc_title_s'] = findTitle(dataJsonObj)
     gblight['dc_description_s'] = deep_get(dataJsonObj,"metadata.idinfo.descript.abstract",
                 re.sub('<[^<]+>', "", deep_get(dataJsonObj,"metadata.dataIdInfo.idAbs",
                 deep_get(dataJsonObj,"gmi:MI_Metadata.gmd:identificationInfo.gmd:MD_DataIdentification.gmd:abstract.gco:CharacterString",""))))
     gblight['dc_rights_s'] = "Public"
+    cub_rights_metadata_s="The organization that has made the Item available believes that the Item is in the Public Domain under the laws of the United States."
+    gblight['cub_rights_metadata_s']=cub_rights_metadata_s
     gblight['dct_provenance_s'] = "University of Colorado Boulder"
     gblight['dct_references_s'] = "DO NOT SET"
     gblight['layer_id_s'] = geoserver_layername 
-    gblight['layer_slug_s'] = "cub:{0}".format(layername)
+    gblight['layer_slug_s'] = "ark:47540-" #.format(layername)
     if resource_type=='coverage':
         gblight['layer_geom_type_s'] = "Raster"
         gblight['dc_format_s'] = "GeoTiff"
     else:
         gblight['layer_geom_type_s'] = determineFeatureGeometry(geoserver_layername)
-        #gblight['layer_geom_type_s'] = "Polygon"
         gblight['dc_format_s'] ="Shapefile"
-    #gblight['dc_format_s'] =deep_get(dataJsonObj,"metadata.distInfo.distFormat.formatName.#text","")
     gblight['dc_language_s'] = "English"
     gblight['dc_type_s'] = "Dataset"
     creator= deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.origin",
@@ -247,7 +247,9 @@ def assignMetaDataComponents(dataJsonObj,layername,geoserver_layername,resource_
     gblight['dc_subject_sm'] = cleanBlanksFromList(subs)
     pubdate=findDataIssued(dataJsonObj)
     gblight['dct_issued_s'] = pubdate
-    gblight['dct_temporal_sm'] = cleanBlanksFromList([u"{0}".format(pubdate)])
+    gblight['dct_created_s']=""
+    #Remove pubdate from dct_temporal_sm leaving clean for possible update to another field
+    gblight['dct_temporal_sm'] = cleanBlanksFromList([])
     place =deep_get(dataJsonObj,"metadata.idinfo.keywords.place.placekey",[])
     if not isinstance(place, list):
         place=[place]
