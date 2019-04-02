@@ -207,15 +207,12 @@ def findDataIssued(dataJsonObj):
     return u'{0}'.format(pubdate)
 
 def assignMetaDataComponents(dataJsonObj,layername,geoserver_layername,resource_type):
-    #dataJsonObj=deep_get(data,"xml.fgdc",[])
-    #if len (dataJsonObj)>0:
-    #    dataJsonObj=deep_get(dataJsonObj[0],"data",{})
-    #else:
-    #    dataJsonObj={}
+    """
+    Geoblacklight crosswalk for metadata
+    """
     gblight={}
-    #layername=os.path.splitext(os.path.basename(data['file']))[0]
-    gblight['uuid']= "https://ark.colorado.edu/ark:47540/" #.format(layername)
-    gblight['dc_identifier_s'] = "https://ark.colorado.edu/ark:47540/" #.format(layername)
+    gblight['uuid']= "https://ark.colorado.edu/ark:47540/"
+    gblight['dc_identifier_s'] = "https://ark.colorado.edu/ark:47540/"
     gblight['dc_title_s'] = findTitle(dataJsonObj)
     gblight['dc_description_s'] = deep_get(dataJsonObj,"metadata.idinfo.descript.abstract",
                 re.sub('<[^<]+>', "", deep_get(dataJsonObj,"metadata.dataIdInfo.idAbs",
@@ -226,7 +223,7 @@ def assignMetaDataComponents(dataJsonObj,layername,geoserver_layername,resource_
     gblight['dct_provenance_s'] = "University of Colorado Boulder"
     gblight['dct_references_s'] = "DO NOT SET"
     gblight['layer_id_s'] = geoserver_layername 
-    gblight['layer_slug_s'] = "ark:47540-" #.format(layername)
+    gblight['layer_slug_s'] = "47540-"
     if resource_type=='coverage':
         gblight['layer_geom_type_s'] = "Raster"
         gblight['dc_format_s'] = "GeoTiff"
