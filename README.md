@@ -1,4 +1,3 @@
-Cybercom Queue
-====
+# geoBlacklight Queue
 
-Example Cybercom task queue. Good starting repo for various asynchronous tasks. 
+This workflow queue is used to provide integration between Geoserver, GeoBlacklight, and the geoData Loader application.
