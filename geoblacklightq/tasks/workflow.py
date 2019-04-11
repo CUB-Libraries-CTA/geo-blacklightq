@@ -37,7 +37,7 @@ def resetSolrIndex(items=None):
 
 
 @task()
-def geoLibraryLoader(local_file, request_data, force=False):
+def geoLibraryLoader(local_file, request_data, force=True):
     """
     Workflow to handle initial import of zipfile:
     --> Unzip

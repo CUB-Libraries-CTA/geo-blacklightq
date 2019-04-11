@@ -38,7 +38,7 @@ def deep_get(_dict, keys, default=None):
     return reduce(_reducer, keys, _dict)
 
 @task()
-def unzip(filename,destination=None,force=False):
+def unzip(filename,destination=None,force=True):
     """
     This task unzips content into directory.
 
