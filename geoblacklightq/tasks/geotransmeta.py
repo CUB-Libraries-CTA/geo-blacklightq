@@ -239,13 +239,16 @@ def findPublishers(dataJsonObj):
     if 'mods:mods' in dataJsonObj:
         flatten = lambda l: [item for sublist in l for item in sublist]
         publishers = []
-        name_tags = nested_lookup(key='mods:name', document=dataJsonObj)[0]
-        for name_tag in name_tags:
-           roleterms = flatten(nested_lookup(key='mods:roleTerm', document=name_tag))
-           for roleterm in roleterms:
-               if roleterm['type'] == 'text' and roleterm['text'] == 'publisher':
-                   publishers.append(name_tag['mods:namePart'])
+        name_tags = nested_lookup(key='mods:publisher', document=dataJsonObj)[0]
+        publishers.append(name_tags)
         return u'{0}'.format(publishers)
+        # for name_tag in name_tags:
+        #    roleterms = flatten(nested_lookup(key='mods:roleTerm', document=name_tag))
+        #
+        #    for roleterm in roleterms:
+        #        if roleterm['type'] == 'text' and roleterm['text'] == 'publisher':
+        #            publishers.append(name_tag['mods:namePart'])
+
     else:
         publishers = deep_get(dataJsonObj,"metadata.idinfo.citation.citeinfo.pubinfo.publish",
             deep_get(dataJsonObj,"metadata.dataIdInfo.idCredit",""))
