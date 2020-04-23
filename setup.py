@@ -12,7 +12,7 @@ setup(name='geoblacklightq',
           'requests==2.20.1',
           'xmltodict==0.11.0',
           'jinja2',
-          'gsconfig',
+          'gsconfig-py3',
           'fiona',
           'mock',
           'rasterio'
