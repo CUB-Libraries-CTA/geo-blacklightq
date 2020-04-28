@@ -12,5 +12,5 @@ except:
     from .workflow import *
 try:
     from geoservertasks import *
-except;
+except:
     from .geoservertasks import *
