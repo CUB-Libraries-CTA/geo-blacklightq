@@ -4,9 +4,9 @@ import requests
 import os
 from requests import exceptions
 from .tasks import solrDeleteIndex, solrIndexSampleData, solrIndexItems
-from geotransmeta import unzip, geoBoundsMetadata, determineTypeBounds
-from geotransmeta import configureGeoData, crossWalkGeoBlacklight
-from geoservertasks import dataLoadGeoserver
+from .geotransmeta import unzip, geoBoundsMetadata, determineTypeBounds
+from .geotransmeta import configureGeoData, crossWalkGeoBlacklight
+from .geoservertasks import dataLoadGeoserver
 import json
 
 wwwdir = "/data/static"
