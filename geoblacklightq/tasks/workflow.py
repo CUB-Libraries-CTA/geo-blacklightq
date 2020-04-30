@@ -3,7 +3,7 @@ from subprocess import call, STDOUT
 import requests
 import os
 from requests import exceptions
-from tasks import solrDeleteIndex, solrIndexSampleData, solrIndexItems
+from .tasks import solrDeleteIndex, solrIndexSampleData, solrIndexItems
 from geotransmeta import unzip, geoBoundsMetadata, determineTypeBounds
 from geotransmeta import configureGeoData, crossWalkGeoBlacklight
 from geoservertasks import dataLoadGeoserver
