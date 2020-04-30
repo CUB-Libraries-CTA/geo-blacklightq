@@ -11,11 +11,11 @@ import json
 import ast
 import requests
 import zipfile
-import fiona
+#import fiona
 import shutil
 import os
 import tempfile
-import rasterio
+#import rasterio
 import xmltodict
 
 # set tmp direcotry. Assign a specific directory with environmental variable
@@ -305,6 +305,9 @@ def cleanBlanksFromList(datalist):
 @task()
 def geoBoundsMetadata(filename, format="shapefile"):
     """
+    **** Removing getting Bounds - Done later in work workflow with GeoServer. 
+
+
     This task finds bounding box of georeferenced shapefile or raster.
 
     Signature:
@@ -318,14 +321,16 @@ def geoBoundsMetadata(filename, format="shapefile"):
         (string): with bounding box.
             path to the unziped directory
     """
-    if format == "shapefile":
-        with fiona.open(filename, 'r') as c:
-            bnd = c.bounds
-            bnd = (bnd[0], bnd[2], bnd[3], bnd[1])
-            return "ENVELOPE{0}".format(bnd)
+    # default with entire colorado
+    return "ENVELOPE(-109.27619724342406,-101.91572412775933,41.036591647196474,36.93298568144766)"
+    # if format == "shapefile":
+    #     with fiona.open(filename, 'r') as c:
+    #         bnd = c.bounds
+    #         bnd = (bnd[0], bnd[2], bnd[3], bnd[1])
+    #         return "ENVELOPE{0}".format(bnd)
 
-    else:
-        with rasterio.open(filename, 'r') as c:
-            bnd = c.bounds
-            bnd = (bnd[0], bnd[2], bnd[3], bnd[1])
-            return "ENVELOPE{0}".format(bnd)
+    # else:
+    #     with rasterio.open(filename, 'r') as c:
+    #         bnd = c.bounds
+    #         bnd = (bnd[0], bnd[2], bnd[3], bnd[1])
+    #         return "ENVELOPE{0}".format(bnd)

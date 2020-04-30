@@ -7,16 +7,17 @@ setup(name='geoblacklightq',
       package_data={'geoblacklightq': [
           'tasks/templates/*.tmpl', 'geoblacklightq/tasks/templates/*.tmpl']},
       install_requires=[
-          'requests==2.20.1',
-          'xmltodict==0.11.0',
+          'requests',
+          'xmltodict',
           'jinja2',
           'gsconfig-py3',
-          'fiona',
-          'mock',
-          'rasterio'
+
       ],
       include_package_data=True,
       )
 
 
 # 'fiona==1.7.12',
+# 'fiona',
+#           'mock',
+#           'rasterio'
