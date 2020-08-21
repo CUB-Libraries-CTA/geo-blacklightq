@@ -6,8 +6,11 @@ from requests import exceptions
 
 # Default base directory
 # basedir="/data/static/"
-
-solr_connection = "http://geoblacklight_solr:8983/solr"
+#os.getenv('WRKSPACE', "geocolorado")
+solr_index = os.getenv('SOLR_INDEX', 'geoblacklight')
+solr_connection = os.getenv(
+    'GEO_SOLR_URL', "http://geoblacklight_solr:8983/solr")
+#solr_connection = "http://geoblacklight_solr:8983/solr"
 # Example task
 
 
@@ -22,7 +25,7 @@ def add(x, y):
 
 
 @task()
-def solrIndexSampleData(catalog_collection='geoblacklight', solr_index='geoblacklight'):
+def solrIndexSampleData(catalog_collection='geoblacklight', solr_index=solr_index):
     """
     Provide a list of JSON items to be index within the
     Geoportal Solr index.
@@ -39,7 +42,7 @@ def solrIndexSampleData(catalog_collection='geoblacklight', solr_index='geoblack
 
 
 @task()
-def solrDeleteIndex(solr_index='geoblacklight'):
+def solrDeleteIndex(solr_index=solr_index):
     """
     Delete Solr Index:
     kwargs: solr_index='geoblacklight'
@@ -52,7 +55,7 @@ def solrDeleteIndex(solr_index='geoblacklight'):
 
 
 @task()
-def solrIndexItems(items, solr_index='geoblacklight'):
+def solrIndexItems(items, solr_index=solr_index):
     """
     Index items to GeoPortal
     """
@@ -66,7 +69,7 @@ def solrIndexItems(items, solr_index='geoblacklight'):
 
 
 @task()
-def solrSearch(query, solr_index='geoblacklight'):
+def solrSearch(query, solr_index=solr_index):
     headers = {'Content-Type': 'application/json'}
     url = "{0}/{1}/select?q={2}".format(solr_connection, solr_index, query)
     sr = requests.get(url, headers=headers)

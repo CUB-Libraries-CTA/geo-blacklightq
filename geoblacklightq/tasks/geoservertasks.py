@@ -9,7 +9,9 @@ import json
 import xmltodict
 
 workspace = os.getenv('WRKSPACE', "geocolorado")
-geoserver_connection = "https://geo.colorado.edu/geoserver"
+geoserver_connection = os.getenv(
+    'GEOSERVER_CONNECTION', "https://geo.colorado.edu/geoserver")
+#geoserver_connection = "https://geo.colorado.edu/geoserver"
 geoserver_username = os.getenv('GEOSVR_USER', "admin")
 geoserver_password = os.getenv('GEOSRV_PASS')
 
