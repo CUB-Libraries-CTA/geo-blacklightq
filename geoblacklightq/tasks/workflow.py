@@ -10,6 +10,9 @@ from .geoservertasks import dataLoadGeoserver
 import json
 
 wwwdir = "/data/static"
+# No slash at end of API URL
+cybercom_api_url = os.getenv(
+    "CYBERCOM_API_URL", "https://geo.colorado.edu/api")
 
 
 @task()
@@ -25,8 +28,8 @@ def resetSolrIndex(items=None):
     if not items:
         headers = {'Content-Type': 'application/json'}
         query = 'query={"filter":{"status":"indexed"},"projection":{"_id":0,"style":0,"status":0}}'
-        url = 'https://geo.colorado.edu/api/catalog/data/catalog/geoportal/.json?{0}'.format(
-            query)
+        url = '{0}/catalog/data/catalog/geoportal.json?{1}'.format(
+            cybercom_api_url, query)
         sr = requests.get(url, headers=headers)
         data = sr.json()
         items = data['results']

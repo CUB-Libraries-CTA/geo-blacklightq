@@ -20,7 +20,10 @@ import xmltodict
 
 # set tmp direcotry. Assign a specific directory with environmental variable
 tmpdir = os.getenv('TMPDIR', tempfile.gettempdir())
-resulturl = "https://geo.colorado.edu/apps/geo_tasks/"
+zipurl = os.getenv(
+    'ZIP_URL', "https://geo.colorado.edu/apps/geolibrary/datasets")
+resulturl = os.getenv('RESULT_URL', "https://geo.colorado.edu/apps/geo_tasks/")
+# resulturl = "https://geo.colorado.edu/apps/geo_tasks/"
 
 
 def findfiles(patterns, where='.'):
@@ -76,8 +79,7 @@ def unzip(filename, destination=None, force=True):
             shutil.rmtree(destination)
         else:
             zipname = filename.split('/')[-1]
-            zip_url = "https://geo.colorado.edu/apps/geolibrary/datasets/{0}".format(
-                zipname)
+            zip_url = "{0}/{1}".format(zipurl, zipname)
             if not os.path.isfile("/data/static/geolibrary/datasets/{0}".format(zipname)):
                 shutil.copy(
                     filename, "/data/static/geolibrary/datasets/{0}".format(zipname))
@@ -88,8 +90,7 @@ def unzip(filename, destination=None, force=True):
     zipname = filename.split('/')[-1]
     shutil.copy(
         filename, "/data/static/geolibrary/datasets/{0}".format(zipname))
-    zip_url = "https://geo.colorado.edu/apps/geolibrary/datasets/{0}".format(
-        zipname)
+    zip_url = "{0}/{1}".format(zipurl, zipname)
     os.remove(filename)
     return {"folder": destination, "zipdata": True, "zipurl": zip_url}
 
