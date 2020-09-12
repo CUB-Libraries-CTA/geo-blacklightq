@@ -57,6 +57,16 @@ def deep_get(_dict, keys, default=None):
 
 
 @task()
+def setModsXML(url, filename, basefolder='/data/static/geolibrary/metadata/'):
+    req = requests.get(url)
+    with open(os.path.join(basefolder, filename), 'w') as f1:
+        f1.write(req.text)
+    url = zipurl.replace('/datasets', '')
+    url = "{0}/metadata/{1}".format(url, filename)
+    return url
+
+
+@task()
 def unzip(filename, destination=None, force=True):
     """
     This task unzips content into directory.
