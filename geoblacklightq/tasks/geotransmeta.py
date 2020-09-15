@@ -23,7 +23,8 @@ tmpdir = os.getenv('TMPDIR', tempfile.gettempdir())
 zipurl = os.getenv(
     'ZIP_URL', "https://geo.colorado.edu/apps/geolibrary/datasets")
 resulturl = os.getenv('RESULT_URL', "https://geo.colorado.edu/apps/geo_tasks/")
-# resulturl = "https://geo.colorado.edu/apps/geo_tasks/"
+arkurl = os.getenv('ARK_URL', "https://test-ark.colorado.edu/ark:/")
+arktoken = os.getenv('ARK_TOKEN', '')
 
 
 def findfiles(patterns, where='.'):
@@ -257,14 +258,52 @@ def findDataIssued(dataJsonObj):
     return u'{0}'.format(pubdate)
 
 
-def assignMetaDataComponents(dataJsonObj, layername, geoserver_layername, resource_type):
+def setARKSlug(gblight, ark, ark_url=arkurl, naan='47540'):
+
+    # double check that arkurl ends with /
+    ark_url = ark_url.strip()
+    if not ark_url.endswith('/'):
+        ark_url = ark_url + '/'
+
+    if ark:
+        gblight['uuid'] = "{0}{1}".format(arkurl, ark)
+        gblight['dc_identifier_s'] = "{0}{1}".format(arkurl, ark)
+        gblight['layer_slug_s'] = ark.replace('/', '-')
+    else:
+        headers = {"Content-Type": "application/json",
+                   "Authorization": "Token {0}".format(arktoken)}
+        resolve_url = resulturl.replace('apps/geo_tasks/', 'catalog/')
+        data = {"resolve_url": resolve_url, "metadata": {"mods": {"titleInfo": [{"title": gblight['dc_title_s']}],
+                                                                  "typeOfResource": "", "identifier": "", "accessCondition": ""}}}
+        req = requests.post("{0}?format=json".format(
+            arkurl), data=json.dumps(data), headers=headers)
+        data = req.json()["results"][0]
+        url = data["ark-detail"]
+        if "ark-detail" in data:
+            del data["ark-detail"]
+        ark = data["ark"]
+        data["resolve_url"]
+        gblight['uuid'] = "{0}{1}".format(arkurl, ark)
+        gblight['dc_identifier_s'] = "{0}{1}".format(arkurl, ark)
+        gblight['layer_slug_s'] = ark.replace('/', '-')
+        data["resolve_url"] = "{0}{1}".format(arkurl, ark)
+        data["metadata"]["mods"]["identifier"] = "{0}{1}".format(arkurl, ark)
+        req = requests.put(url, data=json.dumps(data), headers=headers)
+        if req.status_code >= 400:
+            raise Exception(req.text)
+    return gblight
+
+
+def assignMetaDataComponents(dataJsonObj, layername, geoserver_layername, resource_type, ark=None):
     """
     Geoblacklight crosswalk for metadata
     """
     gblight = {}
-    gblight['uuid'] = "https://ark.colorado.edu/ark:47540/"
-    gblight['dc_identifier_s'] = "https://ark.colorado.edu/ark:47540/"
     gblight['dc_title_s'] = findTitle(dataJsonObj)
+    gblight = setARKSlug(gblight, ark)
+    # gblight['uuid'] = "https://ark.colorado.edu/ark:47540/"
+    # gblight['dc_identifier_s'] = "https://ark.colorado.edu/ark:47540/"
+    # gblight['layer_slug_s'] = "47540-"
     gblight['dc_description_s'] = deep_get(dataJsonObj, "metadata.idinfo.descript.abstract",
                                            re.sub('<[^<]+>', "", deep_get(dataJsonObj, "metadata.dataIdInfo.idAbs",
                                                                           deep_get(dataJsonObj, "gmi:MI_Metadata.gmd:identificationInfo.gmd:MD_DataIdentification.gmd:abstract.gco:CharacterString", ""))))
@@ -274,7 +313,7 @@ def assignMetaDataComponents(dataJsonObj, layername, geoserver_layername, resour
     gblight['dct_provenance_s'] = "University of Colorado Boulder"
     gblight['dct_references_s'] = "DO NOT SET"
     gblight['layer_id_s'] = geoserver_layername
-    gblight['layer_slug_s'] = "47540-"
+
     if resource_type == 'coverage':
         gblight['layer_geom_type_s'] = "Raster"
         gblight['dc_format_s'] = "GeoTiff"
