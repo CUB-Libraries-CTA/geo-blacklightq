@@ -361,6 +361,7 @@ def assignMetaDataComponents(dataJsonObj, layername, geoserver_layername, resour
     gblight['dct_spatial_sm'] = cleanBlanksFromList(place)
     gblight['status'] = "indexed"
     gblight['style'] = getLayerDefaultStyle(geoserver_layername)
+    gblight['mod_import_url'] = ""
     return gblight
 
 
