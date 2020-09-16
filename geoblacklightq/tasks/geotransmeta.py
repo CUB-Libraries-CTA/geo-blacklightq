@@ -24,6 +24,8 @@ zipurl = os.getenv(
     'ZIP_URL', "https://geo.colorado.edu/apps/geolibrary/datasets")
 resulturl = os.getenv('RESULT_URL', "https://geo.colorado.edu/apps/geo_tasks/")
 arkurl = os.getenv('ARK_URL', "https://test-ark.colorado.edu/ark:/")
+geoserver_url = os.getenv('GEOSERVER_CONNECTION',
+                          "https://geo.colorado.edu/geoserver")
 arktoken = os.getenv('ARK_TOKEN', '')
 
 
@@ -186,7 +188,7 @@ def convertStringList(obj):
 
 
 @task()
-def singleCrossWalkGeoBlacklight(filename, layername, geoserver_layername, resource_type):
+def singleCrossWalkGeoBlacklight(filename, layername, geoserver_layername, resource_type, zipurl, mod_url):
     """
     Single XML file crosswalk to GeoBlacklight schema
 
@@ -199,6 +201,10 @@ def singleCrossWalkGeoBlacklight(filename, layername, geoserver_layername, resou
     gblight = assignMetaDataComponents(
         doc, layername, geoserver_layername, resource_type)
     gblight['solr_geom'] = getGeoServerBoundingBox(geoserver_layername)
+    gblight['dct_references_s'] = json.dumps({"http://schema.org/downloadUrl": zipurl,
+                                              "http://www.opengis.net/def/serviceType/ogc/wfs": "{0}/geocolorado/wfs".format(geoserver_url),
+                                              "http://www.opengis.net/def/serviceType/ogc/wms": "{0}/geocolorado/wms".format(geoserver_url),
+                                              "http://www.loc.gov/mods/v3": mod_url})
     return gblight
 
 
@@ -218,6 +224,15 @@ def crossWalkGeoBlacklight(data):
     gblight = assignMetaDataComponents(
         dataJsonObj, layername, geoserver_layername, data["resource_type"])
     gblight['solr_geom'] = data['bounds']
+    # Set dct_references
+    mod_url = zipurl.replace('/datasets', '')
+    mod_url = "{0}/metadata/{1}".format(mod_url, 'blankMODS.xml')
+    mod_url = setModsXML(mod_url, "{0}.xml".format(gblight['layer_slug_s']))
+    gblight['dct_references_s'] = json.dumps({"http://schema.org/downloadUrl": data['zipurl'],
+                                              "http://www.opengis.net/def/serviceType/ogc/wfs": "{0}/geocolorado/wfs".format(geoserver_url),
+                                              "http://www.opengis.net/def/serviceType/ogc/wms": "{0}/geocolorado/wms".format(geoserver_url),
+                                              "http://www.loc.gov/mods/v3": mod_url})
+
     data['geoblacklightschema'] = gblight
     return data
 
