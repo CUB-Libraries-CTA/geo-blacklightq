@@ -286,7 +286,8 @@ def setARKSlug(gblight, ark, ark_url=arkurl, naan='47540'):
         gblight['uuid'] = "{0}{1}".format(arkurl, ark)
         gblight['dc_identifier_s'] = "{0}{1}".format(arkurl, ark)
         gblight['layer_slug_s'] = ark.replace('/', '-')
-        data["resolve_url"] = "{0}{1}".format(arkurl, ark)
+        data["resolve_url"] = "{0}{1}".format(
+            resolve_url, gblight['layer_slug_s'])
         data["metadata"]["mods"]["identifier"] = "{0}{1}".format(arkurl, ark)
         req = requests.put(url, data=json.dumps(data), headers=headers)
         if req.status_code >= 400:
