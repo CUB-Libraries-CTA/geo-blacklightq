@@ -17,7 +17,7 @@ import os
 import tempfile
 #import rasterio
 import xmltodict
-
+import nested_lookup
 # set tmp direcotry. Assign a specific directory with environmental variable
 tmpdir = os.getenv('TMPDIR', tempfile.gettempdir())
 zipurl = os.getenv(
@@ -251,9 +251,10 @@ def findSubject(subjects, keyword):
 
 
 def findTitle(dataJsonObj):
-    title = deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.title",
-                     deep_get(dataJsonObj, "metadata.dataIdInfo.idCitation.resTitle",
-                              deep_get(dataJsonObj, "gmi:MI_Metadata.gmd:parentIdentifier.gco:CharacterString", "")))
+    title = deep_get(dataJsonObj, "mods:mods.mods:titleInfo.mods:title",
+                     deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.title",
+                              deep_get(dataJsonObj, "metadata.dataIdInfo.idCitation.resTitle",
+                                       deep_get(dataJsonObj, "gmi:MI_Metadata.gmd:parentIdentifier.gco:CharacterString", ""))))
     if type(title) == dict:
         try:
             title = title['text']
@@ -263,14 +264,59 @@ def findTitle(dataJsonObj):
 
 
 def findDataIssued(dataJsonObj):
-    pubdate = deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.pubdate",
-                       deep_get(dataJsonObj, "metadata.mdDateSt", ""))
+    pubdate = deep_get(dataJsonObj, "mods:mods.mods:originInfo.mods:dateIssued",
+                       deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.pubdate",
+                                deep_get(dataJsonObj, "metadata.mdDateSt", "")))
     if type(pubdate) == dict:
         try:
             pubdate = pubdate['text']
         except:
             pass
     return u'{0}'.format(pubdate)
+
+
+def findDataCreated(dataJsonObj):
+    createDate = deep_get(dataJsonObj, "mods:mods.mods:originInfo.mods:dateCreated",
+                          deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.pubdate",
+                                   deep_get(dataJsonObj, "metadata.mdDateSt", "")))
+    if type(createDate) == dict:
+        try:
+            createDate = createDate['text']
+        except:
+            pass
+    return u'{0}'.format(createDate)
+
+
+def findCreators(dataJsonObj):
+    if 'mods:mods' in dataJsonObj:
+        def flatten(l): return [item for sublist in l for item in sublist]
+        creators = []
+        name_tags = nested_lookup(key='mods:name', document=dataJsonObj)[0]
+        for name_tag in name_tags:
+            roleterms = flatten(nested_lookup(
+                key='mods:roleTerm', document=name_tag))
+            for roleterm in roleterms:
+                if roleterm['type'] == 'text' and roleterm['text'] == 'creator':
+                    creators.append(name_tag['mods:namePart'])
+        return u'{0}'.format(creators)
+    else:
+        creator = deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.pubinfo.publish",
+                           deep_get(dataJsonObj, "metadata.dataIdInfo.idCitation.citResParty.rpOrgName", []))
+        return u'{0}'.format(creators)
+
+
+def findPublishers(dataJsonObj):
+    if 'mods:mods' in dataJsonObj:
+        def flatten(l): return [item for sublist in l for item in sublist]
+        publishers = []
+        name_tags = nested_lookup(
+            key='mods:publisher', document=dataJsonObj)[0]
+        publishers.append(name_tags)
+        return u'{0}'.format(publishers)
+    else:
+        publishers = deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.pubinfo.publish",
+                              deep_get(dataJsonObj, "metadata.dataIdInfo.idCredit", ""))
+        return u'{0}'.format(publishers)
 
 
 def setARKSlug(gblight, ark, ark_url=arkurl, naan='47540'):
@@ -320,9 +366,9 @@ def assignMetaDataComponents(dataJsonObj, layername, geoserver_layername, resour
     # gblight['uuid'] = "https://ark.colorado.edu/ark:47540/"
     # gblight['dc_identifier_s'] = "https://ark.colorado.edu/ark:47540/"
     # gblight['layer_slug_s'] = "47540-"
-    gblight['dc_description_s'] = deep_get(dataJsonObj, "metadata.idinfo.descript.abstract",
-                                           re.sub('<[^<]+>', "", deep_get(dataJsonObj, "metadata.dataIdInfo.idAbs",
-                                                                          deep_get(dataJsonObj, "gmi:MI_Metadata.gmd:identificationInfo.gmd:MD_DataIdentification.gmd:abstract.gco:CharacterString", ""))))
+    gblight['dc_description_s'] = deep_get(dataJsonObj, "mods:mods.mods:abstract", deep_get(dataJsonObj, "metadata.idinfo.descript.abstract",
+                                                                                            re.sub('<[^<]+>', "", deep_get(dataJsonObj, "metadata.dataIdInfo.idAbs",
+                                                                                                                           deep_get(dataJsonObj, "gmi:MI_Metadata.gmd:identificationInfo.gmd:MD_DataIdentification.gmd:abstract.gco:CharacterString", "")))))
     gblight['dc_rights_s'] = "Public"
     cub_rights_metadata_s = "The organization that has made the Item available believes that the Item is in the Public Domain under the laws of the United States."
     gblight['cub_rights_metadata_s'] = cub_rights_metadata_s
@@ -339,23 +385,24 @@ def assignMetaDataComponents(dataJsonObj, layername, geoserver_layername, resour
         gblight['dc_format_s'] = "Shapefile"
     gblight['dc_language_s'] = "English"
     gblight['dc_type_s'] = "Dataset"
-    creator = deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.origin",
-                       deep_get(dataJsonObj, "metadata.dataIdInfo.idCredit", ""))
-    gblight['dc_publisher_s'] = creator
-    gblight['dc_creator_sm'] = cleanBlanksFromList([u"{0}".format(creator)])
-    subjects = deep_get(dataJsonObj, "metadata.idinfo.keywords.theme",
-                        deep_get(dataJsonObj, "metadata.dataIdInfo.searchKeys", []))
+    # creator = deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.origin",
+    #                    deep_get(dataJsonObj, "metadata.dataIdInfo.idCredit", ""))
+    gblight['dc_publisher_s'] = findPublishers(dataJsonObj)  # creator
+    # cleanBlanksFromList([u"{0}".format(creator)])
+    gblight['dc_creator_sm'] = findCreator(dataJsonObj)
+    subjects = deep_get(dataJsonObj, "mods:mods.mods:subject.mods:topic", deep_get(dataJsonObj, "metadata.idinfo.keywords.theme",
+                                                                                   deep_get(dataJsonObj, "metadata.dataIdInfo.searchKeys", [])))
     subs = findSubject(subjects, "themekey")
     if not subs:
         subs = findSubject(subjects, "keyword")
     gblight['dc_subject_sm'] = cleanBlanksFromList(subs)
     pubdate = findDataIssued(dataJsonObj)
     gblight['dct_issued_s'] = pubdate
-    gblight['dct_created_s'] = ""
+    gblight['dct_created_s'] = findDataCreated(dataJsonObj)
     # Remove pubdate from dct_temporal_sm leaving clean for possible update to another field
     gblight['dct_temporal_sm'] = cleanBlanksFromList([])
-    place = deep_get(
-        dataJsonObj, "metadata.idinfo.keywords.place.placekey", [])
+    place = deep_get(dataJsonObj, "mods:mods.mods:subject.mods:geographic", deep_get(
+        dataJsonObj, "metadata.idinfo.keywords.place.placekey", []))
     if not isinstance(place, list):
         place = [place]
     gblight['dct_spatial_sm'] = cleanBlanksFromList(place)
