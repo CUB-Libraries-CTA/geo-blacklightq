@@ -288,7 +288,7 @@ def setARKSlug(gblight, ark, ark_url=arkurl, naan='47540'):
         headers = {"Content-Type": "application/json",
                    "Authorization": "Token {0}".format(arktoken)}
         resolve_url = resulturl.replace('apps/geo_tasks/', 'catalog/')
-        data = {"resolve_url": resolve_url, "generated_by": "geoDataLoader", "status": "inactive",
+        data = {"resolve_url": resolve_url, "generated_by": "geoBlacklightQ", "status": "inactive",
                 "metadata": {"mods": {"titleInfo": [{"title": gblight['dc_title_s']}],
                                       "typeOfResource": "", "identifier": "", "accessCondition": ""}}}
         req = requests.post("{0}?format=json".format(
