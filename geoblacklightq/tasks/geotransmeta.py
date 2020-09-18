@@ -385,9 +385,9 @@ def assignMetaDataComponents(dataJsonObj, layername, geoserver_layername, resour
         gblight['dc_format_s'] = "Shapefile"
     gblight['dc_language_s'] = "English"
     gblight['dc_type_s'] = "Dataset"
-    creator = deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.origin",
-                       deep_get(dataJsonObj, "metadata.dataIdInfo.idCredit", ""))
-    gblight['dc_publisher_s'] = creator
+    # creator = deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.origin",
+    #                    deep_get(dataJsonObj, "metadata.dataIdInfo.idCredit", ""))
+    gblight['dc_publisher_s'] = findPublishers(dataJsonObj)  # creator
     # cleanBlanksFromList([u"{0}".format(creator)])
     gblight['dc_creator_sm'] = findCreator(dataJsonObj)
     subjects = deep_get(dataJsonObj, "mods:mods.mods:subject.mods:topic", deep_get(dataJsonObj, "metadata.idinfo.keywords.theme",
