@@ -2,6 +2,7 @@ from celery.task import task
 from subprocess import call, STDOUT
 import requests
 import json
+import os
 from requests import exceptions
 
 # Default base directory
