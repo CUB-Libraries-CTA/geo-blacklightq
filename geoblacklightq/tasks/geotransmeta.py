@@ -300,8 +300,8 @@ def findCreators(dataJsonObj):
                     creators.append(name_tag['mods:namePart'])
         return u'{0}'.format(creators)
     else:
-        creator = deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.pubinfo.publish",
-                           deep_get(dataJsonObj, "metadata.dataIdInfo.idCitation.citResParty.rpOrgName", []))
+        creators = deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.pubinfo.publish",
+                            deep_get(dataJsonObj, "metadata.dataIdInfo.idCitation.citResParty.rpOrgName", []))
         return u'{0}'.format(creators)
 
 
