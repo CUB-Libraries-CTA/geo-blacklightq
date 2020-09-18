@@ -188,7 +188,7 @@ def convertStringList(obj):
 
 
 @task()
-def singleCrossWalkGeoBlacklight(filename, layername, geoserver_layername, resource_type, zipurl, mod_url):
+def singleCrossWalkGeoBlacklight(filename, layername, geoserver_layername, resource_type, zipurl, mod_url, ark):
     """
     Single XML file crosswalk to GeoBlacklight schema
 
@@ -199,7 +199,7 @@ def singleCrossWalkGeoBlacklight(filename, layername, geoserver_layername, resou
         doc = xmltodict.parse(stringxml, cdata_key='text',
                               attr_prefix='', dict_constructor=dict)
     gblight = assignMetaDataComponents(
-        doc, layername, geoserver_layername, resource_type)
+        doc, layername, geoserver_layername, resource_type, ark=ark)
     gblight['solr_geom'] = getGeoServerBoundingBox(geoserver_layername)
     gblight['dct_references_s'] = json.dumps({"http://schema.org/downloadUrl": zipurl,
                                               "http://www.opengis.net/def/serviceType/ogc/wfs": "{0}/geocolorado/wfs".format(geoserver_url),
