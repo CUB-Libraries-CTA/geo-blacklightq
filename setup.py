@@ -11,6 +11,7 @@ setup(name='geoblacklightq',
           'xmltodict',
           'jinja2',
           'gsconfig-py3',
+          'nested_lookup'
 
       ],
       include_package_data=True,
