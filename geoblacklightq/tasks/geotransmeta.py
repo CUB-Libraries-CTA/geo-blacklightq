@@ -389,7 +389,7 @@ def assignMetaDataComponents(dataJsonObj, layername, geoserver_layername, resour
     #                    deep_get(dataJsonObj, "metadata.dataIdInfo.idCredit", ""))
     gblight['dc_publisher_s'] = findPublishers(dataJsonObj)  # creator
     # cleanBlanksFromList([u"{0}".format(creator)])
-    gblight['dc_creator_sm'] = findCreator(dataJsonObj)
+    gblight['dc_creator_sm'] = findCreators(dataJsonObj)
     subjects = deep_get(dataJsonObj, "mods:mods.mods:subject.mods:topic", deep_get(dataJsonObj, "metadata.idinfo.keywords.theme",
                                                                                    deep_get(dataJsonObj, "metadata.dataIdInfo.searchKeys", [])))
     subs = findSubject(subjects, "themekey")
