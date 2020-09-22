@@ -17,7 +17,7 @@ import os
 import tempfile
 #import rasterio
 import xmltodict
-import nested_lookup
+from nested_lookup import nested_lookup
 
 # set tmp direcotry. Assign a specific directory with environmental variable
 tmpdir = os.getenv('TMPDIR', tempfile.gettempdir())
@@ -290,13 +290,12 @@ def findDataCreated(dataJsonObj):
 
 def findCreators(dataJsonObj):
     if 'mods:mods' in dataJsonObj:
-        def flatten(l): return [item for sublist in l for item in sublist]
+        #def flatten(l): return [item for sublist in l for item in sublist]
         creators = []
         name_tags = nested_lookup(key='mods:name', document=dataJsonObj)  # [0]
-        print(name_tags)
+        # print(name_tags)
         for name_tag in name_tags:
-            roleterms = flatten(nested_lookup(
-                key='mods:roleTerm', document=name_tag))
+            roleterms = nested_lookup(key='mods:roleTerm', document=name_tag)
             for roleterm in roleterms:
                 if roleterm['type'] == 'text' and roleterm['text'] == 'creator':
                     creators.append(name_tag['mods:namePart'])
@@ -309,12 +308,12 @@ def findCreators(dataJsonObj):
 
 def findPublishers(dataJsonObj):
     if 'mods:mods' in dataJsonObj:
-        def flatten(l): return [item for sublist in l for item in sublist]
-        publishers = []
-        name_tags = nested_lookup(
+        #def flatten(l): return [item for sublist in l for item in sublist]
+        #publishers = []
+        publishers = nested_lookup(
             key='mods:publisher', document=dataJsonObj)  # [0]
-        print(name_tags)
-        publishers.append(name_tags)
+        # print(name_tags)
+        # publishers.append(name_tags)
         return ",".join(publishers)  # u'{0}'.format(",".publishers)
         # for name_tag in name_tags:
         #    roleterms = flatten(nested_lookup(key='mods:roleTerm', document=name_tag))
