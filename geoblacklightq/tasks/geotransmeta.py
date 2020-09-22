@@ -292,7 +292,8 @@ def findCreators(dataJsonObj):
     if 'mods:mods' in dataJsonObj:
         def flatten(l): return [item for sublist in l for item in sublist]
         creators = []
-        name_tags = nested_lookup(key='mods:name', document=dataJsonObj)[0]
+        name_tags = nested_lookup(key='mods:name', document=dataJsonObj)  # [0]
+        print(name_tags)
         for name_tag in name_tags:
             roleterms = flatten(nested_lookup(
                 key='mods:roleTerm', document=name_tag))
@@ -312,6 +313,7 @@ def findPublishers(dataJsonObj):
         publishers = []
         name_tags = nested_lookup(
             key='mods:publisher', document=dataJsonObj)  # [0]
+        print(name_tags)
         publishers.append(name_tags)
         return ",".join(publishers)  # u'{0}'.format(",".publishers)
         # for name_tag in name_tags:
