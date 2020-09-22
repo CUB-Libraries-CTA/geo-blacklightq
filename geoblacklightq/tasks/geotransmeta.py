@@ -311,7 +311,7 @@ def findPublishers(dataJsonObj):
         def flatten(l): return [item for sublist in l for item in sublist]
         publishers = []
         name_tags = nested_lookup(
-            key='mods:publisher', document=dataJsonObj)[0]
+            key='mods:publisher', document=dataJsonObj)  # [0]
         publishers.append(name_tags)
         return ",".join(publishers)  # u'{0}'.format(",".publishers)
         # for name_tag in name_tags:
@@ -397,8 +397,9 @@ def assignMetaDataComponents(dataJsonObj, layername, geoserver_layername, resour
     gblight['dc_type_s'] = "Dataset"
     # creator = deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.origin",
     #                    deep_get(dataJsonObj, "metadata.dataIdInfo.idCredit", ""))
-    gblight['dc_publisher_s'] = findPublishers(dataJsonObj)
+
     gblight['dc_creator_sm'] = findCreators(dataJsonObj)
+    gblight['dc_publisher_s'] = findPublishers(dataJsonObj)
     # cleanBlanksFromList([u"{0}".format(creator)])
     subjects = deep_get(dataJsonObj, "mods:mods.mods:subject.mods:topic",
                         deep_get(dataJsonObj, "metadata.idinfo.keywords.theme",
