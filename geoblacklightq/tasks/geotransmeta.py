@@ -238,17 +238,29 @@ def crossWalkGeoBlacklight(data):
     return data
 
 
-def findSubject(subjects, keyword):
-    subs = []
-    try:
-        for itm in subjects:
-            temp = deep_get(itm, keyword, [])
-            if not isinstance(temp, list):
-                temp = [temp]
-            subs = subs + temp
-    except Exception as inst:
-        subs.append(str(inst))
-    return subs
+def findSubject(dataJsonObj):
+    # deep_get(dataJsonObj, "mods:mods.mods:subject.mods:topic",
+    #                     deep_get(dataJsonObj, "metadata.idinfo.keywords.theme",
+    #                              deep_get(dataJsonObj, "metadata.dataIdInfo.searchKeys", [])))
+    # subs = findSubject(dataJsonObj,subjects, "themekey")
+    # if not subs:
+    #     subs = findSubject(dataJsonObj,subjects, "keyword")
+    if 'mods:mods' in dataJsonObj:
+        return nested_lookup(key='mods:topic', document=doc)
+    else:
+        subjects = deep_get(dataJsonObj, "metadata.idinfo.keywords.theme",
+                            deep_get(dataJsonObj, "metadata.dataIdInfo.searchKeys", []))
+        subs = []
+        try:
+            for keyword in ["themekey", "themekey"]:
+                for itm in subjects:
+                    temp = deep_get(itm, keyword, [])
+                    if not isinstance(temp, list):
+                        temp = [temp]
+                    subs = subs + temp
+        except Exception as inst:
+            subs.append(str(inst))
+        return subs
 
 
 def findTitle(dataJsonObj):
@@ -328,6 +340,17 @@ def findPublishers(dataJsonObj):
         return u'{0}'.format(publishers)
 
 
+def findPlaces(dataJsonObj):
+    if 'mods:mods' in dataJsonObj:
+        return nested_lookup(key='mods:geographic', document=doc)
+    else:
+        place = deep_get(
+            dataJsonObj, "metadata.idinfo.keywords.place.placekey", [])
+        if not isinstance(place, list):
+            place = [place]
+        return place
+
+
 def setARKSlug(gblight, ark, ark_url=arkurl, naan='47540'):
 
     # double check that arkurl ends with /
@@ -402,23 +425,18 @@ def assignMetaDataComponents(dataJsonObj, layername, geoserver_layername, resour
     gblight['dc_creator_sm'] = findCreators(dataJsonObj)
     gblight['dc_publisher_s'] = findPublishers(dataJsonObj)
     # cleanBlanksFromList([u"{0}".format(creator)])
-    subjects = deep_get(dataJsonObj, "mods:mods.mods:subject.mods:topic",
-                        deep_get(dataJsonObj, "metadata.idinfo.keywords.theme",
-                                 deep_get(dataJsonObj, "metadata.dataIdInfo.searchKeys", [])))
-    subs = findSubject(subjects, "themekey")
-    if not subs:
-        subs = findSubject(subjects, "keyword")
-    gblight['dc_subject_sm'] = cleanBlanksFromList(subs)
-    pubdate = findDataIssued(dataJsonObj)
-    gblight['dct_issued_s'] = pubdate
-    gblight['dct_created_s'] = ""
+    #subjects = findSubject(dataJsonObj)
+    gblight['dc_subject_sm'] = cleanBlanksFromList(findSubject(dataJsonObj))
+    # pubdate = findDataIssued(dataJsonObj)
+    gblight['dct_issued_s'] = findDataIssued(dataJsonObj)
+    gblight['dct_created_s'] = findDataCreated(dataJsonObj)
     # Remove pubdate from dct_temporal_sm leaving clean for possible update to another field
     gblight['dct_temporal_sm'] = cleanBlanksFromList([])
-    place = deep_get(dataJsonObj, "mods:mods.mods:subject.mods:geographic", deep_get(
-        dataJsonObj, "metadata.idinfo.keywords.place.placekey", []))
-    if not isinstance(place, list):
-        place = [place]
-    gblight['dct_spatial_sm'] = cleanBlanksFromList(place)
+    # place = deep_get(dataJsonObj, "mods:mods.mods:subject.mods:geographic", deep_get(
+    #     dataJsonObj, "metadata.idinfo.keywords.place.placekey", []))
+    # if not isinstance(place, list):
+    #     place = [place]
+    gblight['dct_spatial_sm'] = cleanBlanksFromList(findPlaces(dataJsonObj))
     gblight['status'] = "indexed"
     gblight['style'] = getLayerDefaultStyle(geoserver_layername)
     gblight['mod_import_url'] = ""
