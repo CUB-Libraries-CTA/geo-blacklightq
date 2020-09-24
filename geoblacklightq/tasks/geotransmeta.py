@@ -331,7 +331,7 @@ def findPublishers(dataJsonObj):
             key='mods:publisher', document=dataJsonObj)  # [0]
         # print(name_tags)
         # publishers.append(name_tags)
-        return ",".join(publishers)  # u'{0}'.format(",".publishers)
+        return ";".join(publishers)  # u'{0}'.format(",".publishers)
         # for name_tag in name_tags:
         #    roleterms = flatten(nested_lookup(key='mods:roleTerm', document=name_tag))
         #
@@ -341,7 +341,8 @@ def findPublishers(dataJsonObj):
 
     else:
         publishers = deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.pubinfo.publish",
-                              deep_get(dataJsonObj, "metadata.dataIdInfo.idCitation.citResParty.rpOrgName", ""))
+                              deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.origin",
+                                       deep_get(dataJsonObj, "metadata.dataIdInfo.idCitation.citResParty.rpOrgName", "")))
         return u'{0}'.format(publishers)
 
 
