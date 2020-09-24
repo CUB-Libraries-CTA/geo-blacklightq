@@ -314,10 +314,10 @@ def findCreators(dataJsonObj):
         return cleanBlanksFromList(creators)
     else:
         creator = deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.pubinfo.publish",
-                            dataJsonObj, "metadata.idinfo.citation.citeinfo.origin",
-                           deep_get(dataJsonObj, "metadata.dataIdInfo.idCitation.citResParty.rpOrgName", [])))
+                           deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.origin",
+                                    deep_get(dataJsonObj, "metadata.dataIdInfo.idCitation.citResParty.rpOrgName", [])))
         if creator == []:
-            creator=""
+            creator = ""
         return cleanBlanksFromList([u"{0}".format(creator)])
 
 
@@ -325,8 +325,8 @@ def findPublishers(dataJsonObj):
     if 'mods:mods' in dataJsonObj:
         # def flatten(l): return [item for sublist in l for item in sublist]
         # publishers = []
-        publishers=nested_lookup(
-            key = 'mods:publisher', document = dataJsonObj)  # [0]
+        publishers = nested_lookup(
+            key='mods:publisher', document=dataJsonObj)  # [0]
         # print(name_tags)
         # publishers.append(name_tags)
         return ",".join(publishers)  # u'{0}'.format(",".publishers)
@@ -338,35 +338,35 @@ def findPublishers(dataJsonObj):
         #            publishers.append(name_tag['mods:namePart'])
 
     else:
-        publishers=deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.pubinfo.publish",
+        publishers = deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.pubinfo.publish",
                               deep_get(dataJsonObj, "metadata.dataIdInfo.idCitation.citResParty.rpOrgName", ""))
         return u'{0}'.format(publishers)
 
 
 def findPlaces(dataJsonObj):
     if 'mods:mods' in dataJsonObj:
-        return nested_lookup(key = 'mods:geographic', document = dataJsonObj)
+        return nested_lookup(key='mods:geographic', document=dataJsonObj)
     else:
-        place=deep_get(
+        place = deep_get(
             dataJsonObj, "metadata.idinfo.keywords.place.placekey", [])
         if not isinstance(place, list):
-            place=[place]
+            place = [place]
         return place
 
 
-def setARKSlug(gblight, ark, ark_url = arkurl, naan = '47540'):
+def setARKSlug(gblight, ark, ark_url=arkurl, naan='47540'):
 
     # double check that arkurl ends with /
-    ark_url=ark_url.strip()
+    ark_url = ark_url.strip()
     if not ark_url.endswith('/'):
-        ark_url=ark_url + '/'
+        ark_url = ark_url + '/'
 
     if ark:
-        gblight['uuid']="{0}{1}".format(arkurl, ark)
-        gblight['dc_identifier_s']="{0}{1}".format(arkurl, ark)
-        gblight['layer_slug_s']=ark.replace('/', '-')
+        gblight['uuid'] = "{0}{1}".format(arkurl, ark)
+        gblight['dc_identifier_s'] = "{0}{1}".format(arkurl, ark)
+        gblight['layer_slug_s'] = ark.replace('/', '-')
     else:
-        headers={"Content-Type": "application/json",
+        headers = {"Content-Type": "application/json",
                    "Authorization": "Token {0}".format(arktoken)}
         resolve_url = resulturl.replace('apps/geo_tasks/', 'catalog/')
         data = {"resolve_url": resolve_url, "generated_by": "geoBlacklightQ", "status": "inactive",
