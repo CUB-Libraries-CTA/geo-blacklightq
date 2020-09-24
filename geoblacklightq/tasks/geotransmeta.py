@@ -313,12 +313,14 @@ def findCreators(dataJsonObj):
                     creators.append(name_tag['mods:namePart'])
         return cleanBlanksFromList(creators)
     else:
-        creator = deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.pubinfo.publish",
-                           deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.origin",
+        creator = deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.origin",
+                           deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.pubinfo.publish",
                                     deep_get(dataJsonObj, "metadata.dataIdInfo.idCitation.citResParty.rpOrgName", [])))
-        if creator == []:
-            creator = ""
-        return cleanBlanksFromList([u"{0}".format(creator)])
+        print("creator:", creator)
+        if type(creator) == str:
+            creator = [u"{0}".format(creator)]
+        print("creator:", creator)
+        return cleanBlanksFromList(creator)
 
 
 def findPublishers(dataJsonObj):
