@@ -246,7 +246,7 @@ def findSubject(dataJsonObj):
     # if not subs:
     #     subs = findSubject(dataJsonObj,subjects, "keyword")
     if 'mods:mods' in dataJsonObj:
-        return nested_lookup(key='mods:topic', document=doc)
+        return nested_lookup(key='mods:topic', document=dataJsonObj)
     else:
         subjects = deep_get(dataJsonObj, "metadata.idinfo.keywords.theme",
                             deep_get(dataJsonObj, "metadata.dataIdInfo.searchKeys", []))
@@ -342,7 +342,7 @@ def findPublishers(dataJsonObj):
 
 def findPlaces(dataJsonObj):
     if 'mods:mods' in dataJsonObj:
-        return nested_lookup(key='mods:geographic', document=doc)
+        return nested_lookup(key='mods:geographic', document=dataJsonObj)
     else:
         place = deep_get(
             dataJsonObj, "metadata.idinfo.keywords.place.placekey", [])
