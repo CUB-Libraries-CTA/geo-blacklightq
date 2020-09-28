@@ -239,12 +239,6 @@ def crossWalkGeoBlacklight(data):
 
 
 def findSubject(dataJsonObj):
-    # deep_get(dataJsonObj, "mods:mods.mods:subject.mods:topic",
-    #                     deep_get(dataJsonObj, "metadata.idinfo.keywords.theme",
-    #                              deep_get(dataJsonObj, "metadata.dataIdInfo.searchKeys", [])))
-    # subs = findSubject(dataJsonObj,subjects, "themekey")
-    # if not subs:
-    #     subs = findSubject(dataJsonObj,subjects, "keyword")
     if 'mods:mods' in dataJsonObj:
         return nested_lookup(key='mods:topic', document=dataJsonObj)
     else:
@@ -285,7 +279,6 @@ def findDataIssued(dataJsonObj):
             pubdate = pubdate['text']
         except:
             pubdate = None
-    # return u'{0}'.format(pubdate)
     return pubdate
 
 
@@ -298,16 +291,13 @@ def findDataCreated(dataJsonObj):
             createDate = createDate['text']
         except:
             createDate = None
-    # return u'{0}'.format(createDate)
     return createDate
 
 
 def findCreators(dataJsonObj):
     if 'mods:mods' in dataJsonObj:
-        # def flatten(l): return [item for sublist in l for item in sublist]
         creators = []
-        name_tags = nested_lookup(key='mods:name', document=dataJsonObj)  # [0]
-        # print(name_tags)
+        name_tags = nested_lookup(key='mods:name', document=dataJsonObj)
         for name_tag in name_tags:
             roleterms = nested_lookup(key='mods:roleTerm', document=name_tag)
             for roleterm in roleterms:
@@ -327,20 +317,9 @@ def findCreators(dataJsonObj):
 
 def findPublishers(dataJsonObj):
     if 'mods:mods' in dataJsonObj:
-        # def flatten(l): return [item for sublist in l for item in sublist]
-        # publishers = []
         publishers = nested_lookup(
-            key='mods:publisher', document=dataJsonObj)  # [0]
-        # print(name_tags)
-        # publishers.append(name_tags)
-        return ";".join(publishers)  # u'{0}'.format(",".publishers)
-        # for name_tag in name_tags:
-        #    roleterms = flatten(nested_lookup(key='mods:roleTerm', document=name_tag))
-        #
-        #    for roleterm in roleterms:
-        #        if roleterm['type'] == 'text' and roleterm['text'] == 'publisher':
-        #            publishers.append(name_tag['mods:namePart'])
-
+            key='mods:publisher', document=dataJsonObj)
+        return ";".join(publishers)
     else:
         publishers = deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.pubinfo.publish",
                               deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.origin",
@@ -403,10 +382,8 @@ def assignMetaDataComponents(dataJsonObj, layername, geoserver_layername, resour
     """
     gblight = {}
     gblight['dc_title_s'] = findTitle(dataJsonObj)
+    # Set Arks
     gblight = setARKSlug(gblight, ark)
-    # gblight['uuid'] = "https://ark.colorado.edu/ark:47540/"
-    # gblight['dc_identifier_s'] = "https://ark.colorado.edu/ark:47540/"
-    # gblight['layer_slug_s'] = "47540-"
     gblight['dc_description_s'] = deep_get(dataJsonObj, "mods:mods.mods:abstract",
                                            deep_get(dataJsonObj, "metadata.idinfo.descript.abstract",
                                                     re.sub('<[^<]+>', "", deep_get(dataJsonObj, "metadata.dataIdInfo.idAbs",
@@ -427,23 +404,14 @@ def assignMetaDataComponents(dataJsonObj, layername, geoserver_layername, resour
         gblight['dc_format_s'] = "Shapefile"
     gblight['dc_language_s'] = "English"
     gblight['dc_type_s'] = "Dataset"
-    # creator = deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.origin",
-    #                    deep_get(dataJsonObj, "metadata.dataIdInfo.idCredit", ""))
-
     gblight['dc_creator_sm'] = findCreators(dataJsonObj)
     gblight['dc_publisher_s'] = findPublishers(dataJsonObj)
-    # cleanBlanksFromList([u"{0}".format(creator)])
-    # subjects = findSubject(dataJsonObj)
     gblight['dc_subject_sm'] = cleanBlanksFromList(findSubject(dataJsonObj))
     # pubdate = findDataIssued(dataJsonObj)
     gblight['dct_issued_s'] = findDataIssued(dataJsonObj)
     gblight['dct_created_s'] = findDataCreated(dataJsonObj)
     # Remove pubdate from dct_temporal_sm leaving clean for possible update to another field
     gblight['dct_temporal_sm'] = cleanBlanksFromList([])
-    # place = deep_get(dataJsonObj, "mods:mods.mods:subject.mods:geographic", deep_get(
-    #     dataJsonObj, "metadata.idinfo.keywords.place.placekey", []))
-    # if not isinstance(place, list):
-    #     place = [place]
     gblight['dct_spatial_sm'] = cleanBlanksFromList(findPlaces(dataJsonObj))
     gblight['status'] = "indexed"
     gblight['style'] = getLayerDefaultStyle(geoserver_layername)
@@ -478,14 +446,3 @@ def geoBoundsMetadata(filename, format="shapefile"):
     """
     # default with entire colorado
     return "ENVELOPE(-109.27619724342406,-101.91572412775933,41.036591647196474,36.93298568144766)"
-    # if format == "shapefile":
-    #     with fiona.open(filename, 'r') as c:
-    #         bnd = c.bounds
-    #         bnd = (bnd[0], bnd[2], bnd[3], bnd[1])
-    #         return "ENVELOPE{0}".format(bnd)
-
-    # else:
-    #     with rasterio.open(filename, 'r') as c:
-    #         bnd = c.bounds
-    #         bnd = (bnd[0], bnd[2], bnd[3], bnd[1])
-    #         return "ENVELOPE{0}".format(bnd)
