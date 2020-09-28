@@ -279,25 +279,27 @@ def findTitle(dataJsonObj):
 def findDataIssued(dataJsonObj):
     pubdate = deep_get(dataJsonObj, "mods:mods.mods:originInfo.mods:dateIssued",
                        deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.pubdate",
-                                deep_get(dataJsonObj, "metadata.mdDateSt", "")))
+                                deep_get(dataJsonObj, "metadata.mdDateSt", None)))
     if type(pubdate) == dict:
         try:
             pubdate = pubdate['text']
         except:
-            pubdate = ''
-    return u'{0}'.format(pubdate)
+            pubdate = None
+    # return u'{0}'.format(pubdate)
+    return pubdate
 
 
 def findDataCreated(dataJsonObj):
     createDate = deep_get(dataJsonObj, "mods:mods.mods:originInfo.mods:dateCreated",
                           deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.pubdate",
-                                   deep_get(dataJsonObj, "metadata.mdDateSt", "")))
+                                   deep_get(dataJsonObj, "metadata.mdDateSt", None)))
     if type(createDate) == dict:
         try:
             createDate = createDate['text']
         except:
-            createDate = ''
-    return u'{0}'.format(createDate)
+            createDate = None
+    # return u'{0}'.format(createDate)
+    return createDate
 
 
 def findCreators(dataJsonObj):
