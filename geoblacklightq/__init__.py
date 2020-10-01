@@ -1,1 +1,1 @@
-from tasks import __init__
+from .tasks import __init__
