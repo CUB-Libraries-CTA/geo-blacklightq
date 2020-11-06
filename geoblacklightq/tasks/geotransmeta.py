@@ -293,16 +293,24 @@ def findDataCreated(dataJsonObj):
             createDate = None
     return createDate
 
+def findcreatorParts(name_tag):
+    creators = []
+    roleterms = nested_lookup(key='mods:roleTerm', document=name_tag)
+    for roleterm in roleterms:
+        if roleterm['type'] == 'text' and roleterm['text'] == 'creator':
+            creators.append(name_tag['mods:namePart'])
+    return creators
 
 def findCreators(dataJsonObj):
     if 'mods:mods' in dataJsonObj:
         creators = []
         name_tags = nested_lookup(key='mods:name', document=dataJsonObj)
         for name_tag in name_tags:
-            roleterms = nested_lookup(key='mods:roleTerm', document=name_tag)
-            for roleterm in roleterms:
-                if roleterm['type'] == 'text' and roleterm['text'] == 'creator':
-                    creators.append(name_tag['mods:namePart'])
+            if type(name_tag) is list:
+                for itm in name_tag:
+                    creators = creators + findcreatorParts(itm)
+            else:
+                creators = creators + findcreatorParts(name_tag)
         return cleanBlanksFromList(creators)
     else:
         creator = deep_get(dataJsonObj, "metadata.idinfo.citation.citeinfo.origin",
@@ -329,7 +337,8 @@ def findPublishers(dataJsonObj):
 
 def findPlaces(dataJsonObj):
     if 'mods:mods' in dataJsonObj:
-        return nested_lookup(key='mods:geographic', document=dataJsonObj)
+        return list(set(nested_lookup(key='mods:placeTerm', document=dataJsonObj) + nested_lookup(key='mods:geographic', document=dataJsonObj)))
+        #return nested_lookup(key='mods:geographic', document=dataJsonObj)
     else:
         place = deep_get(
             dataJsonObj, "metadata.idinfo.keywords.place.placekey", [])
