@@ -337,14 +337,20 @@ def findPublishers(dataJsonObj):
 
 def findPlaces(dataJsonObj):
     if 'mods:mods' in dataJsonObj:
-        return list(set(nested_lookup(key='mods:placeTerm', document=dataJsonObj) + nested_lookup(key='mods:geographic', document=dataJsonObj)))
+        try:
+            place = nested_lookup(key='text',document=nested_lookup(key='mods:geographic', document=dataJsonObj)) 
+            if not place:
+                place = nested_lookup(key='mods:geographic', document=dataJsonObj)
+        except:
+            place =[]
+        #list(set(nested_lookup(key='mods:placeTerm', document=nested_lookup(key='mods:geographic', document=dataJsonObj)))
         #return nested_lookup(key='mods:geographic', document=dataJsonObj)
     else:
         place = deep_get(
             dataJsonObj, "metadata.idinfo.keywords.place.placekey", [])
         if not isinstance(place, list):
             place = [place]
-        return place
+    return place
 
 
 def setARKSlug(gblight, ark, ark_url=arkurl, naan='47540'):
