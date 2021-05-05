@@ -20,7 +20,7 @@ def getUserData():
     """ 
     Example task to return User information within task
     """
-    user_data=getUserData.request.options
+    user_data=getUserData.request
     return user_data
 
 
