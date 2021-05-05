@@ -21,7 +21,7 @@ def getUserData():
     Example task to return User information within task
     """
     print(dir(getUserData))
-    user_data=getUserData.options
+    user_data=getUserData._get_exec_options()
     return user_data
 
 
