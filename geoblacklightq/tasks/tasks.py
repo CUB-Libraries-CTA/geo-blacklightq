@@ -16,11 +16,11 @@ solr_connection = os.getenv(
 
 
 @task()
-def getUserData():
+def getUserData(**options):
     """ 
     Example task to return User information within task
     """
-    user_data=getUserData.request
+    user_data=options
     return user_data
 
 
