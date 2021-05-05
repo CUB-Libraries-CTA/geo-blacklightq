@@ -21,7 +21,7 @@ def getUserData():
     Example task to return User information within task
     """
     print(dir(getUserData.request))
-    user_data=getUserData.request.headers['X-Authenticated-User']
+    user_data=getUserData.request.X-Authenticated-User
     return user_data
 
 
