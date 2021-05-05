@@ -20,7 +20,7 @@ def getUserData():
     """ 
     Example task to return User information within task
     """
-    print(dir(getUserData))
+    print(dir(getUserData.request))
     user_data=getUserData._get_exec_options()
     return user_data
 
