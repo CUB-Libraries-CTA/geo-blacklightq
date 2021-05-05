@@ -16,13 +16,12 @@ solr_connection = os.getenv(
 
 
 @task()
-def add(x, y):
-    """ Example task that adds two numbers or strings
-        args: x and y
-        return addition or concatination of strings
+def getUserData():
+    """ 
+    Example task to return User information within task
     """
-    result = x + y
-    return result
+    user_data=getUserData.request.options
+    return user_data
 
 
 @task()
