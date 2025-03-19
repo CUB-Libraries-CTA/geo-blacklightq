@@ -38,6 +38,13 @@ def resetSolrIndex(items=None):
                 solrIndexItems.si(items).set(queue=queuename))()
     return "Succefully Workflow Submitted: children workflow chain: solrDeleteIndex --> solrIndexItems"
 
+@task()
+def geoDataImport(s3_file_location, force=True):
+    """
+    Workflow to handle import of zipfile
+    """
+    print(s3_file_location)
+ 
 
 @task()
 def geoLibraryLoader(local_file, request_data, force=True):
