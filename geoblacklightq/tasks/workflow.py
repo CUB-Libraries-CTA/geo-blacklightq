@@ -9,6 +9,7 @@ from .geotransmeta import configureGeoData, crossWalkGeoBlacklight
 from .geoservertasks import dataLoadGeoserver
 import json
 import boto3
+import getpass
 
 wwwdir = "/data/static"
 # No slash at end of API URL
@@ -42,19 +43,30 @@ def resetSolrIndex(items=None):
 @task()
 def geoDataImport(s3_bucket, s3_key, force=True):
     """
+    PROTOTYPE ONLY
     Workflow to handle import of zipfile
     Args: 
         s3 bucket name, s3 key
     """
+    myUser = getpass.getuser()
+    print("whoami={0}".format(myUser))
+    s3 = boto3.client('s3')
+
     task_id = str(geoDataImport.request.id)
     result_dir = os.path.join(wwwdir, 'geo_tasks', task_id)
 
     # TODO - get just the file name not including a possible S3 prefix
-    upload_destination = "/data/file_upload/{0}".format(s3_key)
+    upload_destination = "/data/file_upload/" + s3_key
+    #upload_destination = "/data/static/geolibrary/datasets/{0}".format(s3_key)
+    print("s3_bucket:{0}".format(s3_bucket))
+    print("s3_key:{0}".format(s3_key))
+    print("upload_destination:{0}".format(upload_destination))
 
     s3_uri = "s3://{0}/{1}".format(s3_bucket, s3_key)
-    s3 = boto3.client('s3')
-    s3.download_file(s3_bucket, s3_key, upload_destination) 
+    #s3.download_file(s3_bucket, s3_key, upload_destination) 
+
+    with open(upload_destination, 'wb') as f:
+        s3.download_fileobj(s3_bucket, s3_key, f)
 
     result = {
         "data_file": s3_uri,
