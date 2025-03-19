@@ -45,6 +45,7 @@ def geoDataImport(s3_file_location, force=True):
     """
     print(s3_file_location)
  
+    return "Successfully submitted data"
 
 @task()
 def geoLibraryLoader(local_file, request_data, force=True):
