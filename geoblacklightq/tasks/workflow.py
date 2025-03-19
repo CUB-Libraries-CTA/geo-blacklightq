@@ -40,15 +40,24 @@ def resetSolrIndex(items=None):
     return "Successfully Workflow Submitted: children workflow chain: solrDeleteIndex --> solrIndexItems"
 
 @task()
-def geoDataImport(s3_file_location, force=True):
+def geoDataImport(s3_bucket, s3_key, force=True):
     """
     Workflow to handle import of zipfile
+    Args: 
+        s3 bucket name, s3 key
     """
     task_id = str(geoDataImport.request.id)
     result_dir = os.path.join(wwwdir, 'geo_tasks', task_id)
 
+    # TODO - get just the file name not including a possible S3 prefix
+    upload_destination = "/data/file_upload/{0}".format(s3_key)
+
+    s3_uri = "s3://{0}/{1}".format(s3_bucket, s3_key)
+    s3 = boto3.client('s3')
+    s3.download_file(s3_bucket, s3_key, upload_destination) 
+
     result = {
-        "data_file": s3_file_location,
+        "data_file": s3_uri,
         "result_dir": result_dir
     }
  
