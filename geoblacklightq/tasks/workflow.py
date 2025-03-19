@@ -8,6 +8,7 @@ from .geotransmeta import unzip, geoBoundsMetadata, determineTypeBounds
 from .geotransmeta import configureGeoData, crossWalkGeoBlacklight
 from .geoservertasks import dataLoadGeoserver
 import json
+import boto3
 
 wwwdir = "/data/static"
 # No slash at end of API URL
@@ -36,16 +37,22 @@ def resetSolrIndex(items=None):
     queuename = resetSolrIndex.request.delivery_info['routing_key']
     workflow = (solrDeleteIndex.si().set(queue=queuename) |
                 solrIndexItems.si(items).set(queue=queuename))()
-    return "Succefully Workflow Submitted: children workflow chain: solrDeleteIndex --> solrIndexItems"
+    return "Successfully Workflow Submitted: children workflow chain: solrDeleteIndex --> solrIndexItems"
 
 @task()
 def geoDataImport(s3_file_location, force=True):
     """
     Workflow to handle import of zipfile
     """
-    print(s3_file_location)
+    task_id = str(geoDataImport.request.id)
+    result_dir = os.path.join(wwwdir, 'geo_tasks', task_id)
+
+    result = {
+        "data_file": s3_file_location,
+        "result_dir": result_dir
+    }
  
-    return "Successfully submitted data"
+    return result 
 
 @task()
 def geoLibraryLoader(local_file, request_data, force=True):
@@ -73,4 +80,4 @@ def geoLibraryLoader(local_file, request_data, force=True):
                 dataLoadGeoserver.s().set(queue=queuename) |
                 configureGeoData.s(resultDir).set(queue=queuename) |
                 crossWalkGeoBlacklight.s().set(queue=queuename))()
-    return "Succefully submitted geoLibrary initial workflow"
+    return "Successfully submitted geoLibrary initial workflow"
