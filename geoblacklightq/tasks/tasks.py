@@ -1,9 +1,14 @@
-from celery.task import task
+#from celery.task import task
+from celery import Celery
+import celeryconfig
 from subprocess import call, STDOUT
 import requests
 import json
 import os
 from requests import exceptions
+
+app = Celery()
+app.config_from_object(celeryconfig)
 
 # Default base directory
 # basedir="/data/static/"
@@ -12,10 +17,9 @@ solr_index = os.getenv('SOLR_INDEX', 'geoblacklight')
 solr_connection = os.getenv(
     'GEO_SOLR_URL', "http://geoblacklight_solr:8983/solr")
 #solr_connection = "http://geoblacklight_solr:8983/solr"
+
 # Example task
-
-
-@task()
+@app.task()
 def getUserData():
     """ 
     Example task to return User information within task
@@ -24,7 +28,7 @@ def getUserData():
     return user_data
 
 
-@task()
+@app.task()
 def solrIndexSampleData(catalog_collection='geoblacklight', solr_index=solr_index):
     """
     Provide a list of JSON items to be index within the
@@ -41,7 +45,7 @@ def solrIndexSampleData(catalog_collection='geoblacklight', solr_index=solr_inde
     #solr = pysolr.Solr(solr_connection, timeout=10)
 
 
-@task()
+@app.task()
 def solrDeleteIndex(solr_index=solr_index):
     """
     Delete Solr Index:
@@ -54,7 +58,7 @@ def solrDeleteIndex(solr_index=solr_index):
     return {"status": sr.status_code, "url": url, "response": sr.text}
 
 
-@task()
+@app.task()
 def solrIndexItems(items, solr_index=solr_index):
     """
     Index items to GeoPortal
@@ -68,7 +72,7 @@ def solrIndexItems(items, solr_index=solr_index):
     return {"status": sr.status_code, "url": url, "response": sr.json()}
 
 
-@task()
+@app.task()
 def solrSearch(query, solr_index=solr_index):
     headers = {'Content-Type': 'application/json'}
     url = "{0}/{1}/select?q={2}".format(solr_connection, solr_index, query)
