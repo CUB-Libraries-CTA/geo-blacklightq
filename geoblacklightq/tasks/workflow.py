@@ -1,4 +1,5 @@
-from celery.task import task
+from celery import Celery
+import celeryconfig
 from subprocess import call, STDOUT
 import requests
 import os
@@ -11,13 +12,16 @@ import json
 import boto3
 import getpass
 
+app = Celery()
+app.config_from_object(celeryconfig)
+
 wwwdir = "/data/static"
 # No slash at end of API URL
 cybercom_api_url = os.getenv(
     "CYBERCOM_API_URL", "https://geo.colorado.edu/api")
 
 
-@task()
+@app.task()
 def resetSolrIndex(items=None):
     """
     Delete current solr index and indexs items sent in Args
@@ -40,7 +44,7 @@ def resetSolrIndex(items=None):
                 solrIndexItems.si(items).set(queue=queuename))()
     return "Successfully Workflow Submitted: children workflow chain: solrDeleteIndex --> solrIndexItems"
 
-@task()
+@app.task()
 def geoDataImport(s3_bucket, s3_key, force=True):
     """
     PROTOTYPE ONLY
@@ -75,7 +79,7 @@ def geoDataImport(s3_bucket, s3_key, force=True):
  
     return result 
 
-@task()
+@app.task()
 def geoLibraryLoader(local_file, request_data, force=True):
     """
     Workflow to handle initial import of zipfile:
