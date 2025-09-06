@@ -1,4 +1,5 @@
-from celery.task import task
+from celery import Celery
+import celeryconfig
 from subprocess import call, STDOUT
 import requests
 import os
@@ -9,13 +10,16 @@ from .geotransmeta import configureGeoData, crossWalkGeoBlacklight
 from .geoservertasks import dataLoadGeoserver
 import json
 
+app = Celery()
+app.config_from_object(celeryconfig)
+
 wwwdir = "/data/static"
 # No slash at end of API URL
 cybercom_api_url = os.getenv(
     "CYBERCOM_API_URL", "https://geo.colorado.edu/api")
 
 
-@task()
+@app.task()
 def resetSolrIndex(items=None):
     """
     Delete current solr index and indexs items sent in Args
@@ -36,10 +40,10 @@ def resetSolrIndex(items=None):
     queuename = resetSolrIndex.request.delivery_info['routing_key']
     workflow = (solrDeleteIndex.si().set(queue=queuename) |
                 solrIndexItems.si(items).set(queue=queuename))()
-    return "Succefully Workflow Submitted: children workflow chain: solrDeleteIndex --> solrIndexItems"
+    return "Successfully Workflow Submitted: children workflow chain: solrDeleteIndex --> solrIndexItems"
 
 
-@task()
+@app.task()
 def geoLibraryLoader(local_file, request_data, force=True):
     """
     Workflow to handle initial import of zipfile:
@@ -65,4 +69,4 @@ def geoLibraryLoader(local_file, request_data, force=True):
                 dataLoadGeoserver.s().set(queue=queuename) |
                 configureGeoData.s(resultDir).set(queue=queuename) |
                 crossWalkGeoBlacklight.s().set(queue=queuename))()
-    return "Succefully submitted geoLibrary initial workflow"
+    return "Successfully submitted geoLibrary initial workflow"
