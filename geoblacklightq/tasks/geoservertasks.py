@@ -1,4 +1,5 @@
-from celery.task import task
+from celery import Celery
+import celeryconfig
 from subprocess import call, STDOUT
 from geoserver.catalog import Catalog, ConflictingDataError, FailedRequestError
 from geoserver.util import shapefile_and_friends
@@ -7,6 +8,9 @@ import requests
 import os
 import json
 import xmltodict
+
+app = Celery()
+app.config_from_object(celeryconfig)
 
 workspace = os.getenv('WRKSPACE', "geocolorado")
 geoserver_connection = os.getenv(
@@ -44,7 +48,7 @@ def determineFeatureGeometry(layername):
         return "UNDETERMINED"
 
 
-@task()
+@app.task()
 def geoserverGetWorkspaceMetadata(workspace=workspace):
     """
     Task returns a list of all layers within workspace
@@ -72,7 +76,7 @@ def geoserverGetWorkspaceMetadata(workspace=workspace):
     return results
 
 
-@task()
+@app.task()
 def dataLoadGeoserver(data):
     geoserverStoreName = data["folder"].split(
         '/')[-1].lower().replace(' ', '_').replace('(', '').replace(')', '')
@@ -99,7 +103,7 @@ def dataLoadGeoserver(data):
     return data
 
 
-@task()
+@app.task()
 def getGeoServerBoundingBox(geoserver_layername):
     cat = Catalog("{0}/rest/".format(geoserver_connection),
                   geoserver_username, geoserver_password)
@@ -111,7 +115,7 @@ def getGeoServerBoundingBox(geoserver_layername):
     return solr_geom
 
 
-@task()
+@app.task()
 def createDataStore(name, filename, format="shapefile"):
     cat = Catalog("{0}/rest/".format(geoserver_connection),
                   geoserver_username, geoserver_password)
@@ -169,7 +173,7 @@ def createDataStore(name, filename, format="shapefile"):
     return True
 
 
-@task()
+@app.task()
 def getstyles():
     """
     Returns a list of available Geoserver Styles
@@ -183,7 +187,7 @@ def getstyles():
     return data['styles']['style']
 
 
-@task()
+@app.task()
 def getLayerDefaultStyle(layername):
     """
     Return default style for layer
@@ -200,7 +204,7 @@ def getLayerDefaultStyle(layername):
     return data['layer']['defaultStyle']['name']
 
 
-@task()
+@app.task()
 def setLayerDefaultStyle(layername, stylename):
     """
     Set layer default style
@@ -221,7 +225,7 @@ def setLayerDefaultStyle(layername, stylename):
     return {"method": "put", "status_code": result.status_code, "msg": msg}
 
 
-@task()
+@app.task()
 def deleteGeoserverStore(storeName, workspace=workspace, purge=None, recurse=True):
     """
     Delete Geoserver Data Store.

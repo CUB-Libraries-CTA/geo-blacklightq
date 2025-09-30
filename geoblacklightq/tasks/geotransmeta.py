@@ -1,4 +1,5 @@
-from celery.task import task
+from celery import Celery
+import celeryconfig
 from subprocess import call, STDOUT
 from requests import exceptions
 from glob import iglob
@@ -18,6 +19,9 @@ import tempfile
 # import rasterio
 import xmltodict
 from nested_lookup import nested_lookup
+
+app = Celery()
+app.config_from_object(celeryconfig)
 
 # set tmp direcotry. Assign a specific directory with environmental variable
 tmpdir = os.getenv('TMPDIR', tempfile.gettempdir())
@@ -60,7 +64,7 @@ def deep_get(_dict, keys, default=None):
     return reduce(_reducer, keys, _dict)
 
 
-@task()
+@app.task()
 def setModsXML(url, filename, basefolder='/data/static/geolibrary/metadata/'):
     req = requests.get(url)
     with open(os.path.join(basefolder, filename), 'w') as f1:
@@ -70,7 +74,7 @@ def setModsXML(url, filename, basefolder='/data/static/geolibrary/metadata/'):
     return url
 
 
-@task()
+@app.task()
 def unzip(filename, destination=None, force=True):
     """
     This task unzips content into directory.
@@ -109,7 +113,7 @@ def unzip(filename, destination=None, force=True):
     return {"folder": destination, "zipdata": True, "zipurl": zip_url}
 
 
-@task()
+@app.task()
 def determineTypeBounds(data):
     """
     Determine if a shapefile, image, or non georeferenced iiif. Then determines bounds within original projection.
@@ -143,7 +147,7 @@ def determineTypeBounds(data):
     return {"file": file, "folder": folder, "bounds": bounds, "type": type, "msg": msg, "zipurl": data["zipurl"]}
 
 
-@task()
+@app.task()
 def configureGeoData(data, resultDir):
     """
     Finds all xml files within upload dataset. Reads, parses, and converts to python dictionary.
@@ -188,7 +192,7 @@ def convertStringList(obj):
     return obj
 
 
-@task()
+@app.task()
 def singleCrossWalkGeoBlacklight(filename, layername, geoserver_layername, resource_type, zipurl, mod_url, ark):
     """
     Single XML file crosswalk to GeoBlacklight schema
@@ -209,7 +213,7 @@ def singleCrossWalkGeoBlacklight(filename, layername, geoserver_layername, resou
     return gblight
 
 
-@task()
+@app.task()
 def crossWalkGeoBlacklight(data):
     """
     Workflow Crosswalk to GeoBlacklight schema
@@ -440,7 +444,7 @@ def cleanBlanksFromList(datalist):
     return [x for x in datalist if x]
 
 
-@task()
+@app.task()
 def geoBoundsMetadata(filename, format="shapefile"):
     """
     **** Removing getting Bounds - Done later in work workflow with GeoServer. 
